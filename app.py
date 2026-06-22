@@ -222,9 +222,6 @@ with st.sidebar:
             margin-bottom:1rem;
         ">
             <div style="font-size:1.05rem;font-weight:700;">Confissão de dívida</div>
-            <div style="font-size:.86rem;opacity:.88;margin-top:.2rem;">
-                Aquisição de bovinos em leilão
-            </div>
         </div>
         """,
         unsafe_allow_html=True,
@@ -309,7 +306,7 @@ docx_bytes = gerar_contrato_docx(texto_contrato, titulo="Contrato de Confissão 
 _, col_preview, _ = st.columns([1, 2, 1])
 
 with col_preview:
-    st.subheader("Pre-visualizacao")
+    st.subheader("Pré-visualização")
     mostrar_pdf_na_tela(pdf_bytes)
 
     download_col1, download_col2 = st.columns(2)

@@ -77,25 +77,6 @@ st.markdown(
     [data-testid="stSidebar"] textarea {
         border-radius: 6px;
     }
-    [data-testid="stSidebar"] [data-baseweb="radio"] {
-        background: #ffffff;
-        border: 1px solid #d9e1ec;
-        border-radius: 8px;
-        padding: 0.65rem 0.75rem;
-    }
-    [data-testid="stSidebar"] [data-baseweb="radio"] label {
-        color: #16324f;
-        font-weight: 700;
-    }
-    [data-testid="stSidebar"] [data-baseweb="radio"] p {
-        color: #16324f;
-    }
-    [data-testid="stSidebar"] [data-baseweb="radio"] label:hover {
-        color: #0f5fbd;
-    }
-    [data-testid="stSidebar"] [data-baseweb="radio"] label:hover p {
-        color: #0f5fbd;
-    }
     [data-testid="stSidebar"] [data-baseweb="select"] {
         background: #ffffff;
         border-radius: 8px;
@@ -258,7 +239,7 @@ with st.sidebar:
     lotes = st.text_input("Número dos lotes", "NÚMERO DOS LOTES")
 
     st.header("Pagamento")
-    modalidade_pagamento = st.radio(
+    modalidade_pagamento = st.selectbox(
         "Modalidade escolhida",
         ["Cheque único para 120 dias", "Cheques pré-datados", "Cartão de crédito"],
     )

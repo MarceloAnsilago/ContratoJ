@@ -88,6 +88,9 @@ st.markdown(
 
 
 def texto_padrao(dados: dict) -> str:
+    def uma_linha(valor: str) -> str:
+        return " ".join(str(valor).split())
+
     modalidades_pagamento = dados["modalidades_pagamento"]
     opcao1 = "X" if "Cheque único para 120 dias" in modalidades_pagamento else " "
     opcao2 = "X" if "Cheques pré-datados" in modalidades_pagamento else " "
@@ -105,11 +108,11 @@ def texto_padrao(dados: dict) -> str:
 
 Pelo presente instrumento particular, de um lado:
 
-CREDOR: {dados["credor_nome"]}, inscrito(a) no CPF/CNPJ nº {dados["credor_doc"]}, com endereço à {dados["credor_endereco"]};
+CREDOR: {dados["credor_nome"]}, inscrito(a) no CPF/CNPJ nº {dados["credor_doc"]}, com endereço à {uma_linha(dados["credor_endereco"])};
 
 e, de outro lado:
 
-DEVEDOR: {dados["devedor_nome"]}, inscrito(a) no CPF nº {dados["devedor_cpf"]}, portador(a) do RG nº {dados["devedor_rg"]}, residente e domiciliado(a) à {dados["devedor_endereco"]};
+DEVEDOR: {dados["devedor_nome"]}, inscrito(a) no CPF nº {dados["devedor_cpf"]}, portador(a) do RG nº {dados["devedor_rg"]}, residente e domiciliado(a) à {uma_linha(dados["devedor_endereco"])};
 
 têm entre si justo e contratado o presente CONTRATO DE CONFISSÃO DE DÍVIDA, mediante as cláusulas e condições seguintes:
 

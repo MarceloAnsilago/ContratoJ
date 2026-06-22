@@ -44,8 +44,45 @@ st.markdown(
         text-align: center;
     }
     [data-testid="stSidebar"] {
-        min-width: 390px;
-        max-width: 390px;
+        min-width: 430px;
+        max-width: 430px;
+        background: #f7f9fc;
+        border-right: 1px solid #d9e1ec;
+    }
+    [data-testid="stSidebar"] [data-testid="stSidebarContent"] {
+        padding: 1.25rem 1.15rem;
+    }
+    [data-testid="stSidebar"] h1,
+    [data-testid="stSidebar"] h2,
+    [data-testid="stSidebar"] h3 {
+        color: #16324f;
+        letter-spacing: 0;
+    }
+    [data-testid="stSidebar"] h3 {
+        margin-top: 1.1rem;
+        padding: 0.55rem 0.7rem;
+        border-left: 4px solid #1f6feb;
+        background: #eaf2ff;
+        border-radius: 6px;
+        font-size: 1rem;
+    }
+    [data-testid="stSidebar"] label {
+        color: #24364a;
+        font-weight: 600;
+    }
+    [data-testid="stSidebar"] input,
+    [data-testid="stSidebar"] textarea {
+        border-radius: 6px;
+    }
+    [data-testid="stSidebar"] [data-baseweb="radio"] {
+        background: #ffffff;
+        border: 1px solid #d9e1ec;
+        border-radius: 8px;
+        padding: 0.65rem 0.75rem;
+    }
+    [data-testid="stSidebar"] [data-baseweb="select"] {
+        background: #ffffff;
+        border-radius: 8px;
     }
     </style>
     """,
@@ -172,6 +209,24 @@ CPF: {dados["testemunha2_cpf"]}
 st.title("Contrato de Confissão de Dívida")
 
 with st.sidebar:
+    st.markdown(
+        """
+        <div style="
+            background:#16324f;
+            color:#ffffff;
+            padding:1rem;
+            border-radius:8px;
+            margin-bottom:1rem;
+        ">
+            <div style="font-size:1.05rem;font-weight:700;">ContratoJ</div>
+            <div style="font-size:.86rem;opacity:.88;margin-top:.2rem;">
+                Confissão de dívida para aquisição de bovinos em leilão
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
     st.header("Credor")
     credor_nome = st.text_input("Nome do credor ou leiloeira", "NOME DO VENDEDOR OU LEILOEIRA")
     credor_doc = st.text_input("CPF/CNPJ do credor", "XXXXXXXXXXXX")

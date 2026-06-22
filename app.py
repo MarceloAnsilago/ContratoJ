@@ -88,12 +88,10 @@ st.markdown(
 
 
 def texto_padrao(dados: dict) -> str:
-    opcoes_pagamento = {
-        "Cheque único para 120 dias": ("X", " ", " "),
-        "Cheques pré-datados": (" ", "X", " "),
-        "Cartão de crédito": (" ", " ", "X"),
-    }
-    opcao1, opcao2, opcao3 = opcoes_pagamento[dados["modalidade_pagamento"]]
+    modalidades_pagamento = dados["modalidades_pagamento"]
+    opcao1 = "X" if "Cheque único para 120 dias" in modalidades_pagamento else " "
+    opcao2 = "X" if "Cheques pré-datados" in modalidades_pagamento else " "
+    opcao3 = "X" if "Cartão de crédito" in modalidades_pagamento else " "
 
     garantias = {
         "Nota promissória": "X" if "Nota promissória" in dados["garantias"] else " ",
@@ -239,9 +237,10 @@ with st.sidebar:
     lotes = st.text_input("Número dos lotes", "NÚMERO DOS LOTES")
 
     st.header("Pagamento")
-    modalidade_pagamento = st.selectbox(
+    modalidades_pagamento = st.multiselect(
         "Modalidade escolhida",
         ["Cheque único para 120 dias", "Cheques pré-datados", "Cartão de crédito"],
+        default=["Cheque único para 120 dias"],
     )
     valor_parcela = st.text_input("Valor da parcela", "VALOR DA PARCELA")
 
@@ -276,7 +275,7 @@ dados = {
     "valor_extenso": valor_extenso,
     "data_leilao": data_leilao.strftime("%d/%m/%Y"),
     "lotes": lotes,
-    "modalidade_pagamento": modalidade_pagamento,
+    "modalidades_pagamento": modalidades_pagamento,
     "valor_parcela": valor_parcela,
     "garantias": garantias,
     "outra_garantia": outra_garantia,

@@ -1,16 +1,13 @@
-import base64
+from io import BytesIO
 
+import fitz
 import streamlit as st
 
 
 def mostrar_pdf_na_tela(pdf_bytes: bytes):
-    base64_pdf = base64.b64encode(pdf_bytes).decode("utf-8")
-    pdf_iframe = f"""
-        <iframe
-            src="data:application/pdf;base64,{base64_pdf}"
-            width="100%"
-            height="800px"
-            style="border:none;">
-        </iframe>
-    """
-    st.markdown(pdf_iframe, unsafe_allow_html=True)
+    documento = fitz.open(stream=pdf_bytes, filetype="pdf")
+
+    for numero_pagina, pagina in enumerate(documento, start=1):
+        pixmap = pagina.get_pixmap(matrix=fitz.Matrix(1.6, 1.6), alpha=False)
+        imagem = BytesIO(pixmap.tobytes("png"))
+        st.image(imagem, caption=f"Pagina {numero_pagina}", use_container_width=True)

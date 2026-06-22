@@ -83,6 +83,32 @@ st.markdown(
         border-radius: 8px;
         padding: 0.65rem 0.75rem;
     }
+    [data-testid="stSidebar"] [data-baseweb="radio"] label {
+        color: #16324f;
+        font-weight: 700;
+    }
+    [data-testid="stSidebar"] [data-baseweb="radio"] label div,
+    [data-testid="stSidebar"] [data-baseweb="radio"] label span,
+    [data-testid="stSidebar"] [data-baseweb="radio"] p {
+        color: #16324f;
+    }
+    [data-testid="stSidebar"] [data-baseweb="radio"] label:hover {
+        color: #0f5fbd;
+    }
+    [data-testid="stSidebar"] [data-baseweb="radio"] label:hover div,
+    [data-testid="stSidebar"] [data-baseweb="radio"] label:hover span,
+    [data-testid="stSidebar"] [data-baseweb="radio"] label:hover p {
+        color: #0f5fbd;
+    }
+    [data-testid="stSidebar"] [data-baseweb="radio"] [aria-checked="true"] + div,
+    [data-testid="stSidebar"] [data-baseweb="radio"] input:checked + div {
+        color: #0f5fbd;
+    }
+    [data-testid="stSidebar"] [data-baseweb="radio"] > div {
+        background: #ffffff;
+        border-radius: 7px;
+        padding: 0.35rem 0.45rem;
+    }
     [data-testid="stSidebar"] [data-baseweb="select"] {
         background: #ffffff;
         border-radius: 8px;

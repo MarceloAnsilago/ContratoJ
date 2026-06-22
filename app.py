@@ -46,8 +46,8 @@ st.markdown(
     [data-testid="stSidebar"] {
         min-width: 430px;
         max-width: 430px;
-        background: #f7f9fc;
-        border-right: 1px solid #d9e1ec;
+        background: #16324f;
+        border-right: 1px solid #0f253b;
     }
     [data-testid="stSidebar"] [data-testid="stSidebarContent"] {
         padding: 1.25rem 1.15rem;
@@ -55,20 +55,23 @@ st.markdown(
     [data-testid="stSidebar"] h1,
     [data-testid="stSidebar"] h2,
     [data-testid="stSidebar"] h3 {
-        color: #16324f;
+        color: #ffffff;
         letter-spacing: 0;
     }
     [data-testid="stSidebar"] h3 {
         margin-top: 1.1rem;
         padding: 0.55rem 0.7rem;
-        border-left: 4px solid #1f6feb;
-        background: #eaf2ff;
+        border-left: 4px solid #7cb7ff;
+        background: #0f253b;
         border-radius: 6px;
         font-size: 1rem;
     }
     [data-testid="stSidebar"] label {
-        color: #24364a;
+        color: #eef5ff;
         font-weight: 600;
+    }
+    [data-testid="stSidebar"] p {
+        color: #eef5ff;
     }
     [data-testid="stSidebar"] input,
     [data-testid="stSidebar"] textarea {
@@ -212,15 +215,15 @@ with st.sidebar:
     st.markdown(
         """
         <div style="
-            background:#16324f;
+            background:#0f253b;
             color:#ffffff;
             padding:1rem;
             border-radius:8px;
             margin-bottom:1rem;
         ">
-            <div style="font-size:1.05rem;font-weight:700;">ContratoJ</div>
+            <div style="font-size:1.05rem;font-weight:700;">Confissão de dívida</div>
             <div style="font-size:.86rem;opacity:.88;margin-top:.2rem;">
-                Confissão de dívida para aquisição de bovinos em leilão
+                Aquisição de bovinos em leilão
             </div>
         </div>
         """,

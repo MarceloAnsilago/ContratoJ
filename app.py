@@ -113,38 +113,31 @@ dados = {
     "local_data": f"{local}, {date.today().strftime('%d/%m/%Y')}",
 }
 
-col_editor, col_preview = st.columns([1, 1], gap="large")
-
-with col_editor:
-    st.subheader("Texto")
-    texto_contrato = st.text_area(
-        "Edite o contrato antes de gerar",
-        value=texto_padrao(dados),
-        height=720,
-        label_visibility="collapsed",
-    )
+texto_contrato = texto_padrao(dados)
 
 pdf_bytes = gerar_contrato_pdf(texto_contrato, titulo=f"Contrato - {tipo_contrato}")
 docx_bytes = gerar_contrato_docx(texto_contrato, titulo=f"Contrato - {tipo_contrato}")
+
+_, col_preview, _ = st.columns([1, 2, 1])
 
 with col_preview:
     st.subheader("Pre-visualizacao")
     mostrar_pdf_na_tela(pdf_bytes)
 
-download_col1, download_col2 = st.columns(2)
-with download_col1:
-    st.download_button(
-        "Baixar PDF",
-        data=pdf_bytes,
-        file_name="contrato.pdf",
-        mime="application/pdf",
-        use_container_width=True,
-    )
-with download_col2:
-    st.download_button(
-        "Baixar DOCX",
-        data=docx_bytes,
-        file_name="contrato.docx",
-        mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        use_container_width=True,
-    )
+    download_col1, download_col2 = st.columns(2)
+    with download_col1:
+        st.download_button(
+            "Baixar PDF",
+            data=pdf_bytes,
+            file_name="contrato.pdf",
+            mime="application/pdf",
+            use_container_width=True,
+        )
+    with download_col2:
+        st.download_button(
+            "Baixar DOCX",
+            data=docx_bytes,
+            file_name="contrato.docx",
+            mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            use_container_width=True,
+        )

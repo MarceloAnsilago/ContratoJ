@@ -34,12 +34,6 @@ st.set_page_config(
 st.markdown(
     """
     <style>
-    html,
-    body,
-    .stApp,
-    .stApp * {
-        font-family: "Courier New", Courier, monospace !important;
-    }
     .stApp .block-container {
         max-width: 1280px;
         margin-left: auto;

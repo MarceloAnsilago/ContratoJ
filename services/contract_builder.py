@@ -30,7 +30,7 @@ def gerar_contrato_pdf(texto: str, titulo: str = "Contrato") -> bytes:
     normal = ParagraphStyle(
         "ContratoNormal",
         parent=styles["Normal"],
-        fontName="Times-Roman",
+        fontName="Courier",
         fontSize=12,
         leading=18,
         alignment=4,
@@ -40,7 +40,7 @@ def gerar_contrato_pdf(texto: str, titulo: str = "Contrato") -> bytes:
     heading = ParagraphStyle(
         "ContratoTitulo",
         parent=styles["Title"],
-        fontName="Times-Bold",
+        fontName="Courier-Bold",
         fontSize=14,
         leading=18,
         alignment=1,
@@ -72,7 +72,7 @@ def gerar_contrato_docx(texto: str, titulo: str = "Contrato") -> bytes:
     documento.core_properties.title = titulo
 
     estilo = documento.styles["Normal"]
-    estilo.font.name = "Times New Roman"
+    estilo.font.name = "Courier New"
     estilo.font.size = Pt(12)
 
     primeira_linha = True
@@ -90,7 +90,7 @@ def gerar_contrato_docx(texto: str, titulo: str = "Contrato") -> bytes:
 
         run = paragrafo.add_run(bloco)
         run.bold = indice == 0
-        run.font.name = "Times New Roman"
+        run.font.name = "Courier New"
         run.font.size = Pt(14 if indice == 0 else 12)
         primeira_linha = False
 

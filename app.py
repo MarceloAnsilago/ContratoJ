@@ -105,38 +105,43 @@ def texto_padrao(dados: dict) -> str:
     def uma_linha(valor: str) -> str:
         return " ".join(str(valor).split())
 
+    def negrito(valor: str) -> str:
+        return f"[[B]]{valor}[[/B]]"
+
     modalidades_pagamento = dados["modalidades_pagamento"]
-    opcao1 = "X" if "Cheque único para 120 dias" in modalidades_pagamento else " "
-    opcao2 = "X" if "Cheques pré-datados" in modalidades_pagamento else " "
-    opcao3 = "X" if "Cartão de crédito" in modalidades_pagamento else " "
+    opcao1 = negrito("X") if "Cheque único para 120 dias" in modalidades_pagamento else " "
+    opcao2 = negrito("X") if "Cheques pré-datados" in modalidades_pagamento else " "
+    opcao3 = negrito("X") if "Cartão de crédito" in modalidades_pagamento else " "
 
     garantias = {
-        "Nota promissória": "X" if "Nota promissória" in dados["garantias"] else " ",
-        "Avalista(s)": "X" if "Avalista(s)" in dados["garantias"] else " ",
-        "Hipoteca": "X" if "Hipoteca" in dados["garantias"] else " ",
-        "Penhor de animais": "X" if "Penhor de animais" in dados["garantias"] else " ",
-        "Outra garantia": "X" if dados["outra_garantia"].strip() else " ",
+        "Nota promissória": negrito("X") if "Nota promissória" in dados["garantias"] else " ",
+        "Avalista(s)": negrito("X") if "Avalista(s)" in dados["garantias"] else " ",
+        "Hipoteca": negrito("X") if "Hipoteca" in dados["garantias"] else " ",
+        "Penhor de animais": negrito("X") if "Penhor de animais" in dados["garantias"] else " ",
+        "Outra garantia": negrito("X") if dados["outra_garantia"].strip() else " ",
     }
+
+    outra_garantia = dados["outra_garantia"] or "_____________________________"
 
     return f"""CONTRATO DE CONFISSÃO DE DÍVIDA
 
 Pelo presente instrumento particular, de um lado:
 
-CREDOR: {dados["credor_nome"]}, inscrito(a) no CPF/CNPJ nº {dados["credor_doc"]}, com endereço à {uma_linha(dados["credor_endereco"])};
+CREDOR: {negrito(dados["credor_nome"])}, inscrito(a) no CPF/CNPJ nº {negrito(dados["credor_doc"])}, com endereço à {negrito(uma_linha(dados["credor_endereco"]))};
 
 e, de outro lado:
 
-DEVEDOR: {dados["devedor_nome"]}, inscrito(a) no CPF nº {dados["devedor_cpf"]}, portador(a) do RG nº {dados["devedor_rg"]}, residente e domiciliado(a) à {uma_linha(dados["devedor_endereco"])};
+DEVEDOR: {negrito(dados["devedor_nome"])}, inscrito(a) no CPF nº {negrito(dados["devedor_cpf"])}, portador(a) do RG nº {negrito(dados["devedor_rg"])}, residente e domiciliado(a) à {negrito(uma_linha(dados["devedor_endereco"]))};
 
 têm entre si justo e contratado o presente CONTRATO DE CONFISSÃO DE DÍVIDA, mediante as cláusulas e condições seguintes:
 
 CLÁUSULA PRIMEIRA - DA ORIGEM DA DÍVIDA
 
-O DEVEDOR reconhece e confessa ser legítimo devedor da quantia de R$ {dados["valor_total"]} ({dados["valor_extenso"]}), decorrente da aquisição de animais bovinos realizada em leilão promovido em {dados["data_leilao"]}, conforme lote(s) nº {dados["lotes"]}, adquiridos pelo DEVEDOR.
+O DEVEDOR reconhece e confessa ser legítimo devedor da quantia de R$ {negrito(dados["valor_total"])} ({negrito(dados["valor_extenso"])}), decorrente da aquisição de animais bovinos realizada em leilão promovido em {negrito(dados["data_leilao"])}, conforme lote(s) nº {negrito(dados["lotes"])}, adquiridos pelo DEVEDOR.
 
 CLÁUSULA SEGUNDA - DO VALOR E FORMA DE PAGAMENTO
 
-O valor total da dívida confessada é de R$ {dados["valor_total"]} ({dados["valor_extenso"]}), referente à aquisição de animais bovinos em leilão, cujo pagamento será realizado por uma das modalidades abaixo, escolhida pelo DEVEDOR no ato da assinatura deste instrumento:
+O valor total da dívida confessada é de R$ {negrito(dados["valor_total"])} ({negrito(dados["valor_extenso"])}), referente à aquisição de animais bovinos em leilão, cujo pagamento será realizado por uma das modalidades abaixo, escolhida pelo DEVEDOR no ato da assinatura deste instrumento:
 
 ({opcao1}) Opção 1 - Cheque único para 120 dias
 
@@ -151,7 +156,7 @@ O valor total será quitado mediante a entrega de 04 (quatro) cheques pré-datad
 • 90 (noventa) dias;
 • 120 (cento e vinte) dias.
 
-Cada parcela corresponderá ao valor de R$ {dados["valor_parcela"]}.
+Cada parcela corresponderá ao valor de R$ {negrito(dados["valor_parcela"])}.
 
 ({opcao3}) Opção 3 - Pagamento mediante cartão de crédito
 
@@ -171,7 +176,7 @@ III - correção monetária pelo índice oficial aplicável.
 
 CLÁUSULA QUARTA - DO VENCIMENTO ANTECIPADO
 
-O atraso superior a {dados["dias_atraso"]} dias no pagamento de qualquer parcela acarretará o vencimento antecipado das parcelas vincendas, tornando exigível o saldo devedor integral, independentemente de notificação judicial ou extrajudicial.
+O atraso superior a {negrito(dados["dias_atraso"])} dias no pagamento de qualquer parcela acarretará o vencimento antecipado das parcelas vincendas, tornando exigível o saldo devedor integral, independentemente de notificação judicial ou extrajudicial.
 
 CLÁUSULA QUINTA - DA GARANTIA
 
@@ -181,7 +186,7 @@ Para garantia do cumprimento das obrigações assumidas, o DEVEDOR oferece como 
 ({garantias["Avalista(s)"]}) Avalista(s);
 ({garantias["Hipoteca"]}) Hipoteca;
 ({garantias["Penhor de animais"]}) Penhor de animais;
-({garantias["Outra garantia"]}) Outra garantia: {dados["outra_garantia"] or "_____________________________"}.
+({garantias["Outra garantia"]}) Outra garantia: {negrito(outra_garantia)}.
 
 CLÁUSULA SEXTA - DA CONFISSÃO IRREVOGÁVEL
 
@@ -189,32 +194,32 @@ O DEVEDOR declara reconhecer expressamente a existência, legitimidade, liquidez
 
 CLÁUSULA SÉTIMA - DO FORO
 
-Fica eleito o foro da Comarca de {dados["foro"]}, com renúncia a qualquer outro, por mais privilegiado que seja, para dirimir eventuais controvérsias decorrentes deste contrato.
+Fica eleito o foro da Comarca de {negrito(dados["foro"])}, com renúncia a qualquer outro, por mais privilegiado que seja, para dirimir eventuais controvérsias decorrentes deste contrato.
 
 E, por estarem justos e contratados, firmam o presente instrumento em duas vias de igual teor e forma, juntamente com duas testemunhas.
 
-{dados["municipio_assinatura"]}, {dados["dia_assinatura"]} de {dados["mes_assinatura"]} de {dados["ano_assinatura"]}.
+{negrito(dados["municipio_assinatura"])}, {negrito(dados["dia_assinatura"])} de {negrito(dados["mes_assinatura"])} de {negrito(dados["ano_assinatura"])}.
 
 
 ________________________________________
 CREDOR
-CPF/CNPJ: {dados["credor_doc"]}
+CPF/CNPJ: {negrito(dados["credor_doc"])}
 
 
 ________________________________________
 DEVEDOR
-CPF: {dados["devedor_cpf"]}
+CPF: {negrito(dados["devedor_cpf"])}
 
 
 TESTEMUNHAS
 
 ________________________________________
-1. Nome: {dados["testemunha1_nome"]}
-CPF: {dados["testemunha1_cpf"]}
+1. Nome: {negrito(dados["testemunha1_nome"])}
+CPF: {negrito(dados["testemunha1_cpf"])}
 
 ________________________________________
-2. Nome: {dados["testemunha2_nome"]}
-CPF: {dados["testemunha2_cpf"]}
+2. Nome: {negrito(dados["testemunha2_nome"])}
+CPF: {negrito(dados["testemunha2_cpf"])}
 """
 
 

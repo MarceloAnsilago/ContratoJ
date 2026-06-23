@@ -7,7 +7,7 @@ from docx.shared import Pt
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import cm
-from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer
+from reportlab.platypus import HRFlowable, Paragraph, SimpleDocTemplate, Spacer
 
 
 BOLD_START = "[[B]]"
@@ -62,6 +62,23 @@ def _adicionar_runs_formatados(paragrafo, texto: str, *, negrito_base: bool, tam
         run.font.size = Pt(tamanho)
 
 
+def _linha_dupla_pdf() -> list:
+    return [
+        HRFlowable(width="55%", thickness=0.8, color="#111111", spaceBefore=0, spaceAfter=2, hAlign="CENTER"),
+        HRFlowable(width="55%", thickness=0.8, color="#111111", spaceBefore=0, spaceAfter=12, hAlign="CENTER"),
+    ]
+
+
+def _adicionar_linha_dupla_docx(documento: Document) -> None:
+    for indice in range(2):
+        paragrafo = documento.add_paragraph()
+        paragrafo.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        paragrafo.paragraph_format.space_after = Pt(0 if indice == 0 else 12)
+        run = paragrafo.add_run("________________________________________")
+        run.font.name = "Courier New"
+        run.font.size = Pt(8)
+
+
 def gerar_contrato_pdf(texto: str, titulo: str = "Contrato") -> bytes:
     buffer = BytesIO()
     doc = SimpleDocTemplate(
@@ -107,7 +124,7 @@ def gerar_contrato_pdf(texto: str, titulo: str = "Contrato") -> bytes:
         estilo = heading if indice == 0 else normal
         elementos.append(Paragraph(_texto_pdf_formatado(bloco), estilo))
         if indice == 0:
-            elementos.append(Spacer(1, 8))
+            elementos.extend(_linha_dupla_pdf())
             primeira_linha = False
 
     doc.build(elementos)
@@ -142,6 +159,8 @@ def gerar_contrato_docx(texto: str, titulo: str = "Contrato") -> bytes:
             negrito_base=indice == 0,
             tamanho=14 if indice == 0 else 12,
         )
+        if indice == 0:
+            _adicionar_linha_dupla_docx(documento)
         primeira_linha = False
 
     buffer = BytesIO()

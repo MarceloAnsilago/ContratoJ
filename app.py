@@ -1,6 +1,8 @@
 from datetime import date
+from decimal import Decimal, InvalidOperation
 
 import streamlit as st
+from num2words import num2words
 
 from pdf.pdf_utils import mostrar_pdf_na_tela
 from services.contract_builder import gerar_contrato_docx, gerar_contrato_pdf
@@ -66,6 +68,37 @@ st.markdown(
     """,
     unsafe_allow_html=True,
 )
+
+
+def valor_monetario_para_decimal(valor: str) -> Decimal | None:
+    texto = str(valor).strip()
+    if not texto:
+        return None
+
+    normalizado = "".join(caractere for caractere in texto if caractere.isdigit() or caractere in ",.-")
+    if not normalizado:
+        return None
+
+    if "," in normalizado:
+        normalizado = normalizado.replace(".", "").replace(",", ".")
+    elif normalizado.count(".") > 1:
+        partes = normalizado.split(".")
+        normalizado = "".join(partes[:-1]) + "." + partes[-1]
+    elif "." in normalizado and len(normalizado.rsplit(".", 1)[1]) == 3:
+        normalizado = normalizado.replace(".", "")
+
+    try:
+        return Decimal(normalizado)
+    except InvalidOperation:
+        return None
+
+
+def valor_por_extenso(valor: str) -> str:
+    numero = valor_monetario_para_decimal(valor)
+    if numero is None:
+        return "VALOR POR EXTENSO"
+
+    return num2words(numero, lang="pt_BR", to="currency")
 
 
 def texto_padrao(dados: dict) -> str:
@@ -211,7 +244,7 @@ with st.form("formulario_contrato"):
     with col_divida:
         st.markdown("### Dívida")
         valor_total = st.text_input("Valor total", "VALOR TOTAL")
-        valor_extenso = st.text_input("Valor por extenso", "VALOR POR EXTENSO")
+        valor_extenso = st.text_input("Valor por extenso", valor_por_extenso(valor_total), disabled=True)
         data_leilao = st.date_input("Data do leilão", value=date.today(), format="DD/MM/YYYY")
         lotes = st.text_input("Número dos lotes", "NÚMERO DOS LOTES")
 

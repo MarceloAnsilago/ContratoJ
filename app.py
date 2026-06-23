@@ -64,6 +64,26 @@ st.markdown(
     [data-testid="stForm"] textarea {
         border-radius: 6px;
     }
+    .pdf-preview-frame {
+        background: #eef1f5;
+        border: 1px solid #c8d0dc;
+        border-radius: 8px;
+        box-shadow: 0 12px 28px rgba(15, 23, 42, 0.16);
+        margin: 0.5rem auto 0.2rem;
+        padding: 1rem;
+    }
+    .pdf-preview-frame img {
+        display: block;
+        width: 100%;
+        border: 1px solid #d7dce5;
+        box-shadow: 0 2px 8px rgba(15, 23, 42, 0.1);
+    }
+    .pdf-preview-caption {
+        color: #5f6b7a;
+        font-size: 0.85rem;
+        margin-bottom: 1rem;
+        text-align: center;
+    }
     </style>
     """,
     unsafe_allow_html=True,

@@ -2,17 +2,21 @@ from io import BytesIO
 
 import fitz
 import streamlit as st
-from PIL import Image
+from PIL import Image, ImageFilter
 
 
 def adicionar_moldura(imagem_bytes: bytes) -> BytesIO:
     pagina = Image.open(BytesIO(imagem_bytes)).convert("RGB")
 
     margem = 42
-    largura = pagina.width + (margem * 2)
+    deslocamento_sombra = 9
+    largura = pagina.width + (margem * 2) + deslocamento_sombra
     altura = pagina.height + (margem * 2)
 
-    fundo = Image.new("RGB", (largura, altura), "#f7f8fb")
+    fundo = Image.new("RGB", (largura, altura), "#f9fafb")
+    sombra = Image.new("RGBA", (10, pagina.height), (15, 23, 42, 50))
+    sombra = sombra.filter(ImageFilter.GaussianBlur(4))
+    fundo.paste(sombra, (margem + pagina.width - 2, margem), sombra)
     fundo.paste(pagina, (margem, margem))
 
     saida = BytesIO()

@@ -13,7 +13,7 @@ def adicionar_moldura(imagem_bytes: bytes) -> BytesIO:
     largura = pagina.width + (margem * 2) + deslocamento_sombra
     altura = pagina.height + (margem * 2)
 
-    fundo = Image.new("RGB", (largura, altura), "#f9fafb")
+    fundo = Image.new("RGB", (largura, altura), "#f0f2f6")
     sombra = Image.new("RGBA", (10, pagina.height), (15, 23, 42, 50))
     sombra = sombra.filter(ImageFilter.GaussianBlur(4))
     fundo.paste(sombra, (margem + pagina.width - 2, margem), sombra)

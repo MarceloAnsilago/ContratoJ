@@ -65,7 +65,7 @@ def _adicionar_runs_formatados(paragrafo, texto: str, *, negrito_base: bool, tam
 def _linha_dupla_pdf() -> list:
     return [
         HRFlowable(width="55%", thickness=0.8, color="#111111", spaceBefore=0, spaceAfter=2, hAlign="CENTER"),
-        HRFlowable(width="55%", thickness=0.8, color="#111111", spaceBefore=0, spaceAfter=12, hAlign="CENTER"),
+        HRFlowable(width="55%", thickness=0.8, color="#111111", spaceBefore=0, spaceAfter=10, hAlign="CENTER"),
     ]
 
 
@@ -73,7 +73,7 @@ def _adicionar_linha_dupla_docx(documento: Document) -> None:
     for indice in range(2):
         paragrafo = documento.add_paragraph()
         paragrafo.alignment = WD_ALIGN_PARAGRAPH.CENTER
-        paragrafo.paragraph_format.space_after = Pt(0 if indice == 0 else 12)
+        paragrafo.paragraph_format.space_after = Pt(0 if indice == 0 else 10)
         run = paragrafo.add_run("________________________________________")
         run.font.name = "Courier New"
         run.font.size = Pt(8)
@@ -109,7 +109,7 @@ def gerar_contrato_pdf(texto: str, titulo: str = "Contrato") -> bytes:
         fontSize=14,
         leading=18,
         alignment=1,
-        spaceAfter=18,
+        spaceAfter=5,
     )
 
     elementos = []
@@ -151,7 +151,7 @@ def gerar_contrato_docx(texto: str, titulo: str = "Contrato") -> bytes:
         indice = 0 if primeira_linha else 1
         paragrafo.alignment = WD_ALIGN_PARAGRAPH.CENTER if indice == 0 else WD_ALIGN_PARAGRAPH.JUSTIFY
         paragrafo.paragraph_format.first_line_indent = Pt(0 if indice == 0 else 36)
-        paragrafo.paragraph_format.space_after = Pt(10)
+        paragrafo.paragraph_format.space_after = Pt(4 if indice == 0 else 10)
 
         _adicionar_runs_formatados(
             paragrafo,

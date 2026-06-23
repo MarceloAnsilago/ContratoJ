@@ -26,7 +26,7 @@ st.set_page_config(
     page_title="Gerador de Contrato",
     page_icon="DOC",
     layout="wide",
-    initial_sidebar_state="expanded",
+    initial_sidebar_state="collapsed",
 )
 
 st.markdown(
@@ -43,43 +43,24 @@ st.markdown(
     .stApp .block-container h2 {
         text-align: center;
     }
-    [data-testid="stSidebar"] {
-        min-width: 430px;
-        max-width: 430px;
-        background: #16324f;
-        border-right: 1px solid #0f253b;
+    [data-testid="stForm"] {
+        border: 1px solid #d8dee9;
+        border-radius: 8px;
+        padding: 1.25rem;
+        background: #ffffff;
     }
-    [data-testid="stSidebar"] [data-testid="stSidebarContent"] {
-        padding: 1.25rem 1.15rem;
+    [data-testid="stForm"] h3 {
+        margin-top: 0.2rem;
+        padding-bottom: 0.25rem;
+        border-bottom: 1px solid #edf0f5;
+        font-size: 1.05rem;
     }
-    [data-testid="stSidebar"] h1,
-    [data-testid="stSidebar"] h2,
-    [data-testid="stSidebar"] h3 {
-        color: #ffffff;
-        letter-spacing: 0;
-    }
-    [data-testid="stSidebar"] h3 {
-        margin-top: 1.1rem;
-        padding: 0.55rem 0.7rem;
-        border-left: 4px solid #7cb7ff;
-        background: #0f253b;
-        border-radius: 6px;
-        font-size: 1rem;
-    }
-    [data-testid="stSidebar"] label {
-        color: #eef5ff;
+    [data-testid="stForm"] label {
         font-weight: 600;
     }
-    [data-testid="stSidebar"] p {
-        color: #eef5ff;
-    }
-    [data-testid="stSidebar"] input,
-    [data-testid="stSidebar"] textarea {
+    [data-testid="stForm"] input,
+    [data-testid="stForm"] textarea {
         border-radius: 6px;
-    }
-    [data-testid="stSidebar"] [data-baseweb="select"] {
-        background: #ffffff;
-        border-radius: 8px;
     }
     </style>
     """,
@@ -206,65 +187,70 @@ CPF: {dados["testemunha2_cpf"]}
 
 st.title("Contrato de Confissão de Dívida")
 
-with st.sidebar:
-    st.markdown(
-        """
-        <div style="
-            background:#0f253b;
-            color:#ffffff;
-            padding:1rem;
-            border-radius:8px;
-            margin-bottom:1rem;
-        ">
-            <div style="font-size:1.05rem;font-weight:700;">Confissão de dívida</div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
+with st.form("formulario_contrato"):
+    st.subheader("Dados do contrato")
 
-    st.header("Credor")
-    credor_nome = st.text_input("Nome do credor ou leiloeira", "NOME DO VENDEDOR OU LEILOEIRA")
-    credor_doc = st.text_input("CPF/CNPJ do credor", "XXXXXXXXXXXX")
-    credor_endereco = st.text_area("Endereço do credor", "ENDEREÇO COMPLETO")
+    col_credor, col_devedor = st.columns(2)
+    with col_credor:
+        st.markdown("### Credor")
+        credor_nome = st.text_input("Nome do credor ou leiloeira", "NOME DO VENDEDOR OU LEILOEIRA")
+        credor_doc = st.text_input("CPF/CNPJ do credor", "XXXXXXXXXXXX")
+        credor_endereco = st.text_area("Endereço do credor", "ENDEREÇO COMPLETO", height=95)
 
-    st.header("Devedor")
-    devedor_nome = st.text_input("Nome do comprador", "NOME DO COMPRADOR")
-    devedor_cpf = st.text_input("CPF do devedor", "XXXXXXXXXXXX")
-    devedor_rg = st.text_input("RG do devedor", "XXXXXXXXXXXX")
-    devedor_endereco = st.text_area("Endereço do devedor", "ENDEREÇO COMPLETO")
+    with col_devedor:
+        st.markdown("### Devedor")
+        devedor_nome = st.text_input("Nome do comprador", "NOME DO COMPRADOR")
+        devedor_doc_col, devedor_rg_col = st.columns(2)
+        with devedor_doc_col:
+            devedor_cpf = st.text_input("CPF do devedor", "XXXXXXXXXXXX")
+        with devedor_rg_col:
+            devedor_rg = st.text_input("RG do devedor", "XXXXXXXXXXXX")
+        devedor_endereco = st.text_area("Endereço do devedor", "ENDEREÇO COMPLETO", height=95)
 
-    st.header("Dívida")
-    valor_total = st.text_input("Valor total", "VALOR TOTAL")
-    valor_extenso = st.text_input("Valor por extenso", "VALOR POR EXTENSO")
-    data_leilao = st.date_input("Data do leilão", value=date.today(), format="DD/MM/YYYY")
-    lotes = st.text_input("Número dos lotes", "NÚMERO DOS LOTES")
+    col_divida, col_pagamento, col_garantia = st.columns(3)
+    with col_divida:
+        st.markdown("### Dívida")
+        valor_total = st.text_input("Valor total", "VALOR TOTAL")
+        valor_extenso = st.text_input("Valor por extenso", "VALOR POR EXTENSO")
+        data_leilao = st.date_input("Data do leilão", value=date.today(), format="DD/MM/YYYY")
+        lotes = st.text_input("Número dos lotes", "NÚMERO DOS LOTES")
 
-    st.header("Pagamento")
-    modalidades_pagamento = st.multiselect(
-        "Modalidade escolhida",
-        ["Cheque único para 120 dias", "Cheques pré-datados", "Cartão de crédito"],
-        default=["Cheque único para 120 dias"],
-    )
-    valor_parcela = st.text_input("Valor da parcela", "VALOR DA PARCELA")
+    with col_pagamento:
+        st.markdown("### Pagamento")
+        modalidades_pagamento = st.multiselect(
+            "Modalidade escolhida",
+            ["Cheque único para 120 dias", "Cheques pré-datados", "Cartão de crédito"],
+            default=["Cheque único para 120 dias"],
+        )
+        valor_parcela = st.text_input("Valor da parcela", "VALOR DA PARCELA")
+        dias_atraso = st.number_input("Dias para vencimento antecipado", min_value=1, value=30)
 
-    st.header("Garantia")
-    garantias = st.multiselect(
-        "Garantias oferecidas",
-        ["Nota promissória", "Avalista(s)", "Hipoteca", "Penhor de animais"],
-    )
-    outra_garantia = st.text_input("Outra garantia", "")
+    with col_garantia:
+        st.markdown("### Garantia")
+        garantias = st.multiselect(
+            "Garantias oferecidas",
+            ["Nota promissória", "Avalista(s)", "Hipoteca", "Penhor de animais"],
+        )
+        outra_garantia = st.text_input("Outra garantia", "")
 
-    st.header("Foro e assinatura")
-    dias_atraso = st.number_input("Dias para vencimento antecipado", min_value=1, value=30)
-    foro = st.text_input("Comarca/UF", "MUNICÍPIO/UF")
-    municipio_assinatura = st.text_input("Município da assinatura", "Município")
-    data_assinatura = st.date_input("Data da assinatura", value=date.today(), format="DD/MM/YYYY")
+    col_foro, col_testemunha1, col_testemunha2 = st.columns(3)
+    with col_foro:
+        st.markdown("### Foro e assinatura")
+        foro = st.text_input("Comarca/UF", "MUNICÍPIO/UF")
+        municipio_assinatura = st.text_input("Município da assinatura", "Município")
+        data_assinatura = st.date_input("Data da assinatura", value=date.today(), format="DD/MM/YYYY")
 
-    st.header("Testemunhas")
-    testemunha1_nome = st.text_input("Nome da testemunha 1", "____________________________")
-    testemunha1_cpf = st.text_input("CPF da testemunha 1", "_____________________________")
-    testemunha2_nome = st.text_input("Nome da testemunha 2", "____________________________")
-    testemunha2_cpf = st.text_input("CPF da testemunha 2", "_____________________________")
+    with col_testemunha1:
+        st.markdown("### Testemunha 1")
+        testemunha1_nome = st.text_input("Nome da testemunha 1", "____________________________")
+        testemunha1_cpf = st.text_input("CPF da testemunha 1", "_____________________________")
+
+    with col_testemunha2:
+        st.markdown("### Testemunha 2")
+        testemunha2_nome = st.text_input("Nome da testemunha 2", "____________________________")
+        testemunha2_cpf = st.text_input("CPF da testemunha 2", "_____________________________")
+
+    st.form_submit_button("Atualizar pré-visualização", width="stretch")
 
 dados = {
     "credor_nome": credor_nome,

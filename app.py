@@ -38,6 +38,10 @@ st.set_page_config(
 st.markdown(
     """
     <style>
+    .stApp {
+        background:
+            radial-gradient(circle at top, #f2f6f3 0%, #fbfcfb 38%, #ffffff 100%);
+    }
     .stApp .block-container {
         max-width: 1280px;
         margin-left: auto;
@@ -45,15 +49,15 @@ st.markdown(
         padding-left: 2rem;
         padding-right: 2rem;
     }
-    .stApp .block-container h1,
     .stApp .block-container h2 {
         text-align: center;
     }
     [data-testid="stForm"] {
         border: 1px solid #d8dee9;
-        border-radius: 8px;
+        border-radius: 14px;
         padding: 1.25rem;
-        background: #ffffff;
+        background: rgba(255, 255, 255, 0.94);
+        box-shadow: 0 18px 40px rgba(36, 52, 44, 0.07);
     }
     [data-testid="stForm"] h3 {
         margin-top: 0.2rem;
@@ -67,6 +71,31 @@ st.markdown(
     [data-testid="stForm"] input,
     [data-testid="stForm"] textarea {
         border-radius: 6px;
+    }
+    .titulo-contrato {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.8rem;
+        margin: 0.4rem 0 1.5rem;
+        color: #24342c;
+    }
+    .titulo-icone {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 3.25rem;
+        height: 3.25rem;
+        border-radius: 999px;
+        background: linear-gradient(135deg, #6f8f80 0%, #8fae9c 100%);
+        box-shadow: 0 12px 24px rgba(111, 143, 128, 0.22);
+        font-size: 1.45rem;
+    }
+    .titulo-texto {
+        margin: 0;
+        font-size: 2.4rem;
+        line-height: 1.1;
+        letter-spacing: -0.03em;
     }
     .bloco-separador {
         height: 1px;
@@ -342,7 +371,15 @@ CPF: {negrito(campo_ou_linha(dados["testemunha2_cpf"], ""))}
 """
 
 
-st.title("Contrato de Confissão de Dívida")
+st.markdown(
+    """
+    <div class="titulo-contrato">
+        <span class="titulo-icone">📄</span>
+        <h1 class="titulo-texto">Contrato de Confissão de Dívida</h1>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
 
 contrato_importado = st.file_uploader(
     "Importar contrato anterior para copiar credor e devedor",
@@ -356,7 +393,7 @@ if contrato_importado is not None:
 
     if dados_importados:
         st.info("Arquivo carregado. Clique no botão abaixo para copiar os dados de credor e devedor.")
-        if st.button("Importar dados do arquivo", type="primary"):
+        if st.button("📥 Importar dados do arquivo", type="primary"):
             for chave, valor in dados_importados.items():
                 st.session_state[chave] = valor
             st.success("Dados de credor e devedor importados do contrato anterior.")
@@ -389,12 +426,12 @@ with st.form("formulario_contrato"):
     botoes_col1, botoes_col2, botoes_col3 = st.columns([1, 1, 1])
     with botoes_col1:
         st.markdown('<div class="botao-credor-wrap">', unsafe_allow_html=True)
-        st.form_submit_button("Limpar credor", width="stretch", on_click=limpar_dados_credor)
+        st.form_submit_button("🧹 Limpar credor", width="stretch", on_click=limpar_dados_credor)
         st.markdown("</div>", unsafe_allow_html=True)
     with botoes_col2:
         st.write("")
     with botoes_col3:
-        st.form_submit_button("Limpar devedor", width="stretch", on_click=limpar_dados_devedor)
+        st.form_submit_button("🧹 Limpar devedor", width="stretch", on_click=limpar_dados_devedor)
 
     st.markdown('<div class="bloco-separador"></div>', unsafe_allow_html=True)
 
@@ -467,7 +504,7 @@ with st.form("formulario_contrato"):
         testemunha2_nome = st.text_input("Nome da testemunha 2", key="testemunha2_nome")
         testemunha2_cpf = st.text_input("CPF da testemunha 2", key="testemunha2_cpf")
 
-    atualizar_preview = st.form_submit_button("Atualizar pré-visualização", width="stretch")
+    atualizar_preview = st.form_submit_button("🔄 Atualizar pré-visualização", width="stretch")
 
 dados = {
     "credor_nome": credor_nome,
@@ -527,7 +564,7 @@ with col_preview:
     download_col1, download_col2 = st.columns(2)
     with download_col1:
         st.download_button(
-            "Baixar PDF",
+            "⬇️ Baixar PDF",
             data=pdf_bytes,
             file_name=f"contrato_confissao_divida_{nome_comprador_arquivo}.pdf",
             mime="application/pdf",
@@ -535,7 +572,7 @@ with col_preview:
         )
     with download_col2:
         st.download_button(
-            "Baixar DOCX",
+            "⬇️ Baixar DOCX",
             data=docx_bytes,
             file_name=f"contrato_confissao_divida_{nome_comprador_arquivo}.docx",
             mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",

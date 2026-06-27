@@ -345,20 +345,18 @@ contrato_importado = st.file_uploader(
 )
 
 if contrato_importado is not None:
-    assinatura_arquivo = f"{contrato_importado.name}:{contrato_importado.size}"
-    if st.session_state.get("contrato_importado_assinatura") != assinatura_arquivo:
-        texto_importado = extrair_texto_arquivo(contrato_importado.name, contrato_importado.getvalue())
-        dados_importados = extrair_partes_importadas(texto_importado)
+    texto_importado = extrair_texto_arquivo(contrato_importado.name, contrato_importado.getvalue())
+    dados_importados = extrair_partes_importadas(texto_importado)
 
-        for chave, valor in dados_importados.items():
-            st.session_state[chave] = valor
-
-        st.session_state["contrato_importado_assinatura"] = assinatura_arquivo
-
-        if dados_importados:
+    if dados_importados:
+        st.info("Arquivo carregado. Clique no botão abaixo para copiar os dados de credor e devedor.")
+        if st.button("Importar dados do arquivo", type="primary"):
+            for chave, valor in dados_importados.items():
+                st.session_state[chave] = valor
             st.success("Dados de credor e devedor importados do contrato anterior.")
-        else:
-            st.warning("Não foi possível localizar automaticamente os dados de credor e devedor nesse arquivo.")
+            st.rerun()
+    else:
+        st.warning("Não foi possível localizar automaticamente os dados de credor e devedor nesse arquivo.")
 
 data_leilao_padrao = date.today()
 

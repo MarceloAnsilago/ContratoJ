@@ -406,32 +406,33 @@ data_leilao_padrao = date.today()
 with st.form("formulario_contrato"):
     st.subheader("Dados do contrato")
 
-    col_credor, col_devedor = st.columns(2)
-    with col_credor:
-        st.markdown("### Credor")
-        credor_nome = st.text_input("Nome do credor ou leiloeira", key="credor_nome")
-        credor_doc = st.text_input("CPF/CNPJ do credor", key="credor_doc")
-        credor_endereco = st.text_area("Endereço do credor", key="credor_endereco", height=95)
+    with st.expander("Credor e devedor", expanded=True):
+        col_credor, col_devedor = st.columns(2)
+        with col_credor:
+            st.markdown("### Credor")
+            credor_nome = st.text_input("Nome do credor ou leiloeira", key="credor_nome")
+            credor_doc = st.text_input("CPF/CNPJ do credor", key="credor_doc")
+            credor_endereco = st.text_area("Endereco do credor", key="credor_endereco", height=95)
 
-    with col_devedor:
-        st.markdown("### Devedor")
-        devedor_nome = st.text_input("Nome do comprador", key="devedor_nome")
-        devedor_doc_col, devedor_rg_col = st.columns(2)
-        with devedor_doc_col:
-            devedor_cpf = st.text_input("CPF do devedor", key="devedor_cpf")
-        with devedor_rg_col:
-            devedor_rg = st.text_input("RG do devedor", key="devedor_rg")
-        devedor_endereco = st.text_area("Endereço do devedor", key="devedor_endereco", height=95)
+        with col_devedor:
+            st.markdown("### Devedor")
+            devedor_nome = st.text_input("Nome do comprador", key="devedor_nome")
+            devedor_doc_col, devedor_rg_col = st.columns(2)
+            with devedor_doc_col:
+                devedor_cpf = st.text_input("CPF do devedor", key="devedor_cpf")
+            with devedor_rg_col:
+                devedor_rg = st.text_input("RG do devedor", key="devedor_rg")
+            devedor_endereco = st.text_area("Endereco do devedor", key="devedor_endereco", height=95)
 
-    botoes_col1, botoes_col2, botoes_col3 = st.columns([1, 1, 1])
-    with botoes_col1:
-        st.markdown('<div class="botao-credor-wrap">', unsafe_allow_html=True)
-        st.form_submit_button("🧹 Limpar credor", width="stretch", on_click=limpar_dados_credor)
-        st.markdown("</div>", unsafe_allow_html=True)
-    with botoes_col2:
-        st.write("")
-    with botoes_col3:
-        st.form_submit_button("🧹 Limpar devedor", width="stretch", on_click=limpar_dados_devedor)
+        botoes_col1, botoes_col2, botoes_col3 = st.columns([1, 1, 1])
+        with botoes_col1:
+            st.markdown('<div class="botao-credor-wrap">', unsafe_allow_html=True)
+            st.form_submit_button("Limpar credor", width="stretch", on_click=limpar_dados_credor)
+            st.markdown("</div>", unsafe_allow_html=True)
+        with botoes_col2:
+            st.write("")
+        with botoes_col3:
+            st.form_submit_button("Limpar devedor", width="stretch", on_click=limpar_dados_devedor)
 
     st.markdown('<div class="bloco-separador"></div>', unsafe_allow_html=True)
 

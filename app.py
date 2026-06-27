@@ -1,7 +1,11 @@
+import re
 from datetime import date, timedelta
 from decimal import Decimal, InvalidOperation
+from io import BytesIO
 
 import streamlit as st
+from PyPDF2 import PdfReader
+from docx import Document
 from num2words import num2words
 
 from pdf.pdf_utils import mostrar_pdf_na_tela
@@ -112,6 +116,107 @@ def formatar_data(data_valor: date) -> str:
     return data_valor.strftime("%d/%m/%Y")
 
 
+def extrair_texto_arquivo(nome_arquivo: str, conteudo: bytes) -> str:
+    extensao = nome_arquivo.lower().rsplit(".", 1)[-1]
+
+    if extensao == "docx":
+        documento = Document(BytesIO(conteudo))
+        return "\n".join(paragrafo.text for paragrafo in documento.paragraphs if paragrafo.text.strip())
+
+    if extensao == "pdf":
+        leitor = PdfReader(BytesIO(conteudo))
+        return "\n".join((pagina.extract_text() or "") for pagina in leitor.pages)
+
+    return ""
+
+
+def normalizar_texto_importado(texto: str) -> str:
+    return re.sub(r"\s+", " ", texto).strip()
+
+
+def limpar_campo_importado(valor: str) -> str:
+    texto = valor.strip(" []")
+    if not texto:
+        return ""
+    if re.fullmatch(r"[_\-.Xx\s/]+", texto):
+        return ""
+    if texto.upper() in {"NOME DO VENDEDOR OU LEILOEIRA", "ENDEREÇO COMPLETO"}:
+        return ""
+    return texto
+
+
+def extrair_partes_importadas(texto: str) -> dict[str, str]:
+    texto_normalizado = normalizar_texto_importado(texto)
+
+    padrao_credor = re.compile(
+        r"CREDOR:\s*(?P<nome>.*?),\s*inscrito\(a\)\s*no\s*CPF/CNPJ\s*n[ºo]\s*(?P<doc>.*?),\s*com\s*endereç[oó]\s*à\s*(?P<endereco>.*?);",
+        re.IGNORECASE,
+    )
+    padrao_devedor = re.compile(
+        r"DEVEDOR:\s*(?P<nome>.*?),\s*inscrito\(a\)\s*no\s*CPF\s*n[ºo]\s*(?P<cpf>.*?),\s*portador\(a\)\s*do\s*RG\s*n[ºo]\s*(?P<rg>.*?),\s*residente\s*e\s*domiciliado\(a\)\s*à\s*(?P<endereco>.*?);",
+        re.IGNORECASE,
+    )
+
+    dados: dict[str, str] = {}
+
+    credor = padrao_credor.search(texto_normalizado)
+    if credor:
+        dados["credor_nome"] = limpar_campo_importado(credor.group("nome"))
+        dados["credor_doc"] = limpar_campo_importado(credor.group("doc"))
+        dados["credor_endereco"] = limpar_campo_importado(credor.group("endereco"))
+
+    devedor = padrao_devedor.search(texto_normalizado)
+    if devedor:
+        dados["devedor_nome"] = limpar_campo_importado(devedor.group("nome"))
+        dados["devedor_cpf"] = limpar_campo_importado(devedor.group("cpf"))
+        dados["devedor_rg"] = limpar_campo_importado(devedor.group("rg"))
+        dados["devedor_endereco"] = limpar_campo_importado(devedor.group("endereco"))
+
+    dados = {chave: valor for chave, valor in dados.items() if valor}
+
+    return dados
+
+
+def inicializar_estado_formulario() -> None:
+    defaults = {
+        "credor_nome": "NOME DO VENDEDOR OU LEILOEIRA",
+        "credor_doc": "XXXXXXXXXXXX",
+        "credor_endereco": "ENDEREÇO COMPLETO",
+        "devedor_nome": "",
+        "devedor_cpf": "",
+        "devedor_rg": "",
+        "devedor_endereco": "",
+        "valor_total": "",
+        "modalidades_pagamento": ["Cheque único para 120 dias"],
+        "valor_parcela": "",
+        "dias_atraso": 30,
+        "foro": "São Francisco do Guaporé - RO",
+        "municipio_assinatura": "São Francisco do Guaporé – RO",
+        "cheque_unico_banco": "",
+        "cheque_unico_agencia": "",
+        "cheque_unico_conta": "",
+        "cheque_unico_numero": "",
+        "parcela1_cheque": "",
+        "parcela1_banco": "",
+        "parcela2_cheque": "",
+        "parcela2_banco": "",
+        "parcela3_cheque": "",
+        "parcela3_banco": "",
+        "parcela4_cheque": "",
+        "parcela4_banco": "",
+        "testemunha1_nome": "",
+        "testemunha1_cpf": "",
+        "testemunha2_nome": "",
+        "testemunha2_cpf": "",
+    }
+
+    for chave, valor in defaults.items():
+        st.session_state.setdefault(chave, valor)
+
+
+inicializar_estado_formulario()
+
+
 def texto_padrao(dados: dict) -> str:
     def negrito(valor: str) -> str:
         return f"[[B]]{valor}[[/B]]"
@@ -209,6 +314,28 @@ CPF: {negrito(campo_ou_linha(dados["testemunha2_cpf"], ""))}
 
 st.title("Contrato de Confissão de Dívida")
 
+contrato_importado = st.file_uploader(
+    "Importar contrato anterior para copiar credor e devedor",
+    type=["docx", "pdf"],
+    help="O app tenta extrair automaticamente nome, documento e endereço do credor e do devedor.",
+)
+
+if contrato_importado is not None:
+    assinatura_arquivo = f"{contrato_importado.name}:{contrato_importado.size}"
+    if st.session_state.get("contrato_importado_assinatura") != assinatura_arquivo:
+        texto_importado = extrair_texto_arquivo(contrato_importado.name, contrato_importado.getvalue())
+        dados_importados = extrair_partes_importadas(texto_importado)
+
+        for chave, valor in dados_importados.items():
+            st.session_state[chave] = valor
+
+        st.session_state["contrato_importado_assinatura"] = assinatura_arquivo
+
+        if dados_importados:
+            st.success("Dados de credor e devedor importados do contrato anterior.")
+        else:
+            st.warning("Não foi possível localizar automaticamente os dados de credor e devedor nesse arquivo.")
+
 data_leilao_padrao = date.today()
 
 with st.form("formulario_contrato"):
@@ -217,24 +344,24 @@ with st.form("formulario_contrato"):
     col_credor, col_devedor = st.columns(2)
     with col_credor:
         st.markdown("### Credor")
-        credor_nome = st.text_input("Nome do credor ou leiloeira", "NOME DO VENDEDOR OU LEILOEIRA")
-        credor_doc = st.text_input("CPF/CNPJ do credor", "XXXXXXXXXXXX")
-        credor_endereco = st.text_area("Endereço do credor", "ENDEREÇO COMPLETO", height=95)
+        credor_nome = st.text_input("Nome do credor ou leiloeira", key="credor_nome")
+        credor_doc = st.text_input("CPF/CNPJ do credor", key="credor_doc")
+        credor_endereco = st.text_area("Endereço do credor", key="credor_endereco", height=95)
 
     with col_devedor:
         st.markdown("### Devedor")
-        devedor_nome = st.text_input("Nome do comprador", "")
+        devedor_nome = st.text_input("Nome do comprador", key="devedor_nome")
         devedor_doc_col, devedor_rg_col = st.columns(2)
         with devedor_doc_col:
-            devedor_cpf = st.text_input("CPF do devedor", "")
+            devedor_cpf = st.text_input("CPF do devedor", key="devedor_cpf")
         with devedor_rg_col:
-            devedor_rg = st.text_input("RG do devedor", "")
-        devedor_endereco = st.text_area("Endereço do devedor", "", height=95)
+            devedor_rg = st.text_input("RG do devedor", key="devedor_rg")
+        devedor_endereco = st.text_area("Endereço do devedor", key="devedor_endereco", height=95)
 
     col_divida, col_pagamento, col_assinatura = st.columns(3)
     with col_divida:
         st.markdown("### Dívida")
-        valor_total = st.text_input("Valor total", "")
+        valor_total = st.text_input("Valor total", key="valor_total")
         valor_extenso = st.text_input("Valor por extenso", valor_por_extenso(valor_total), disabled=True)
         data_leilao = st.date_input("Data do leilão", value=data_leilao_padrao, format="DD/MM/YYYY")
         lotes = st.text_input("Número dos lotes", "")
@@ -244,27 +371,28 @@ with st.form("formulario_contrato"):
         modalidades_pagamento = st.multiselect(
             "Modalidade escolhida",
             ["Cheque único para 120 dias", "Cheques pré-datados parcelados", "Cartão de crédito"],
-            default=["Cheque único para 120 dias"],
+            default=st.session_state["modalidades_pagamento"],
+            key="modalidades_pagamento",
         )
-        valor_parcela = st.text_input("Valor da parcela", "")
-        dias_atraso = st.number_input("Dias para vencimento antecipado", min_value=1, value=30)
+        valor_parcela = st.text_input("Valor da parcela", key="valor_parcela")
+        dias_atraso = st.number_input("Dias para vencimento antecipado", min_value=1, key="dias_atraso")
 
     with col_assinatura:
         st.markdown("### Foro e assinatura")
-        foro = st.text_input("Comarca/UF", "São Francisco do Guaporé - RO")
-        municipio_assinatura = st.text_input("Município da assinatura", "São Francisco do Guaporé – RO")
+        foro = st.text_input("Comarca/UF", key="foro")
+        municipio_assinatura = st.text_input("Município da assinatura", key="municipio_assinatura")
         data_assinatura = st.date_input("Data da assinatura", value=date.today(), format="DD/MM/YYYY")
 
     st.markdown("### Cheque único para 120 dias")
     col_cheque1, col_cheque2, col_cheque3, col_cheque4 = st.columns(4)
     with col_cheque1:
-        cheque_unico_banco = st.text_input("Banco", "")
+        cheque_unico_banco = st.text_input("Banco", key="cheque_unico_banco")
     with col_cheque2:
-        cheque_unico_agencia = st.text_input("Agência", "")
+        cheque_unico_agencia = st.text_input("Agência", key="cheque_unico_agencia")
     with col_cheque3:
-        cheque_unico_conta = st.text_input("Conta", "")
+        cheque_unico_conta = st.text_input("Conta", key="cheque_unico_conta")
     with col_cheque4:
-        cheque_unico_numero = st.text_input("Cheque nº", "")
+        cheque_unico_numero = st.text_input("Cheque nº", key="cheque_unico_numero")
 
     st.markdown("### Cheques pré-datados parcelados")
     parcela1_padrao = data_leilao + timedelta(days=30)
@@ -275,29 +403,29 @@ with st.form("formulario_contrato"):
     col_p1, col_p2 = st.columns(2)
     with col_p1:
         parcela1_data = st.date_input("Vencimento parcela 1", value=parcela1_padrao, format="DD/MM/YYYY")
-        parcela1_cheque = st.text_input("Cheque nº parcela 1", "")
-        parcela1_banco = st.text_input("Banco parcela 1", "")
+        parcela1_cheque = st.text_input("Cheque nº parcela 1", key="parcela1_cheque")
+        parcela1_banco = st.text_input("Banco parcela 1", key="parcela1_banco")
         parcela2_data = st.date_input("Vencimento parcela 2", value=parcela2_padrao, format="DD/MM/YYYY")
-        parcela2_cheque = st.text_input("Cheque nº parcela 2", "")
-        parcela2_banco = st.text_input("Banco parcela 2", "")
+        parcela2_cheque = st.text_input("Cheque nº parcela 2", key="parcela2_cheque")
+        parcela2_banco = st.text_input("Banco parcela 2", key="parcela2_banco")
     with col_p2:
         parcela3_data = st.date_input("Vencimento parcela 3", value=parcela3_padrao, format="DD/MM/YYYY")
-        parcela3_cheque = st.text_input("Cheque nº parcela 3", "")
-        parcela3_banco = st.text_input("Banco parcela 3", "")
+        parcela3_cheque = st.text_input("Cheque nº parcela 3", key="parcela3_cheque")
+        parcela3_banco = st.text_input("Banco parcela 3", key="parcela3_banco")
         parcela4_data = st.date_input("Vencimento parcela 4", value=parcela4_padrao, format="DD/MM/YYYY")
-        parcela4_cheque = st.text_input("Cheque nº parcela 4", "")
-        parcela4_banco = st.text_input("Banco parcela 4", "")
+        parcela4_cheque = st.text_input("Cheque nº parcela 4", key="parcela4_cheque")
+        parcela4_banco = st.text_input("Banco parcela 4", key="parcela4_banco")
 
     col_testemunha1, col_testemunha2 = st.columns(2)
     with col_testemunha1:
         st.markdown("### Testemunha 1")
-        testemunha1_nome = st.text_input("Nome da testemunha 1", "")
-        testemunha1_cpf = st.text_input("CPF da testemunha 1", "")
+        testemunha1_nome = st.text_input("Nome da testemunha 1", key="testemunha1_nome")
+        testemunha1_cpf = st.text_input("CPF da testemunha 1", key="testemunha1_cpf")
 
     with col_testemunha2:
         st.markdown("### Testemunha 2")
-        testemunha2_nome = st.text_input("Nome da testemunha 2", "")
-        testemunha2_cpf = st.text_input("CPF da testemunha 2", "")
+        testemunha2_nome = st.text_input("Nome da testemunha 2", key="testemunha2_nome")
+        testemunha2_cpf = st.text_input("CPF da testemunha 2", key="testemunha2_cpf")
 
     st.form_submit_button("Atualizar pré-visualização", width="stretch")
 

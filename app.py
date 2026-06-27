@@ -464,15 +464,16 @@ with st.form("formulario_contrato"):
     st.markdown('<div class="bloco-separador"></div>', unsafe_allow_html=True)
 
     with st.expander("Financeiro", expanded=True):
+        st.markdown("### Leil\u00e3o e d\u00edvida")
         col_data_leilao, col_divida, col_valor_extenso = st.columns(3)
         with col_data_leilao:
-            data_leilao = st.date_input("Data do leil?o", value=data_leilao_padrao, format="DD/MM/YYYY")
+            data_leilao = st.date_input("Data do leil\u00e3o", value=data_leilao_padrao, format="DD/MM/YYYY")
         with col_divida:
-            valor_total = st.text_input("Divida", key="valor_total")
+            valor_total = st.text_input("D\u00edvida", key="valor_total")
         with col_valor_extenso:
             valor_extenso = st.text_input("Valor por extenso", valor_por_extenso(valor_total), disabled=True)
 
-        lotes = st.text_input("N?mero dos lotes", "")
+        lotes = st.text_input("N\u00famero dos lotes", "")
 
         st.markdown("### Pagamento")
         modalidades_pagamento = st.multiselect(

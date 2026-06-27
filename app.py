@@ -519,79 +519,105 @@ with st.container():
             OPCOES_MODALIDADES_PAGAMENTO,
             key="modalidades_pagamento",
         )
-        st.markdown("### Para cheque")
-        col_qtd_parcelas, col_dias_parcela, col_valor_parcela = st.columns(3)
-        with col_qtd_parcelas:
-            qtd_parcelas = st.number_input("QTD parcelas (mensais)", min_value=1, step=1, key="qtd_parcelas")
-        with col_dias_parcela:
-            dias_atraso = st.selectbox(
-                "Dias para vencimento de cada parcela",
-                options=OPCOES_DIAS_PARCELA,
-                key="dias_atraso",
-            )
-        with col_valor_parcela:
-            valor_parcela = st.text_input(
-                "Valor da parcela",
-                value=valor_parcela_calculado(valor_total, int(qtd_parcelas)),
-                disabled=True,
-            )
-
-        st.markdown("### Tabela de vencimentos")
-        tabela_vencimentos = gerar_tabela_vencimentos(
-            data_inicial=data_leilao,
-            qtd_parcelas=int(qtd_parcelas),
-            intervalo_dias=int(dias_atraso),
-            valor_total=valor_total,
+        mostrar_formulario_cheque = any(
+            modalidade in modalidades_pagamento
+            for modalidade in OPCOES_MODALIDADES_PAGAMENTO[:2]
         )
-        st.dataframe(tabela_vencimentos, hide_index=True, width="stretch")
+        mostrar_formulario_cartao = OPCOES_MODALIDADES_PAGAMENTO[2] in modalidades_pagamento
 
-        st.markdown("### Dados bancarios")
-        col_cheque1, col_cheque2, col_cheque3, col_cheque4 = st.columns(4)
-        with col_cheque1:
-            cheque_unico_banco = st.text_input("Banco", key="cheque_unico_banco")
-        with col_cheque2:
-            cheque_unico_agencia = st.text_input("Agência", key="cheque_unico_agencia")
-        with col_cheque3:
-            cheque_unico_conta = st.text_input("Conta", key="cheque_unico_conta")
-        with col_cheque4:
-            cheque_unico_numero = st.text_input("Cheque nº", key="cheque_unico_numero")
+        if mostrar_formulario_cheque:
+            st.markdown("### Para cheque")
+            col_qtd_parcelas, col_dias_parcela, col_valor_parcela = st.columns(3)
+            with col_qtd_parcelas:
+                qtd_parcelas = st.number_input("QTD parcelas (mensais)", min_value=1, step=1, key="qtd_parcelas")
+            with col_dias_parcela:
+                dias_atraso = st.selectbox(
+                    "Dias para vencimento de cada parcela",
+                    options=OPCOES_DIAS_PARCELA,
+                    key="dias_atraso",
+                )
+            with col_valor_parcela:
+                valor_parcela = st.text_input(
+                    "Valor da parcela",
+                    value=valor_parcela_calculado(valor_total, int(qtd_parcelas)),
+                    disabled=True,
+                )
 
-        st.markdown('<div class="bloco-separador"></div>', unsafe_allow_html=True)
-        st.markdown("### Para Cartao de Credito")
-        col_qtd_parcelas_cartao, col_dias_parcela_cartao, col_valor_parcela_cartao = st.columns(3)
-        with col_qtd_parcelas_cartao:
-            qtd_parcelas_cartao = st.number_input("QTD parcelas (mensais)", min_value=1, step=1, key="qtd_parcelas_cartao")
-        with col_dias_parcela_cartao:
-            dias_atraso_cartao = st.selectbox(
-                "Dias para vencimento de cada parcela",
-                options=OPCOES_DIAS_PARCELA,
-                key="dias_atraso_cartao",
+            st.markdown("### Tabela de vencimentos")
+            tabela_vencimentos = gerar_tabela_vencimentos(
+                data_inicial=data_leilao,
+                qtd_parcelas=int(qtd_parcelas),
+                intervalo_dias=int(dias_atraso),
+                valor_total=valor_total,
             )
-        with col_valor_parcela_cartao:
-            valor_parcela_cartao = st.text_input(
-                "Valor da parcela",
-                value=valor_parcela_calculado(valor_total, int(qtd_parcelas_cartao)),
-                disabled=True,
+            st.dataframe(tabela_vencimentos, hide_index=True, width="stretch")
+
+            st.markdown("### Dados bancarios")
+            col_cheque1, col_cheque2, col_cheque3, col_cheque4 = st.columns(4)
+            with col_cheque1:
+                cheque_unico_banco = st.text_input("Banco", key="cheque_unico_banco")
+            with col_cheque2:
+                cheque_unico_agencia = st.text_input("Agencia", key="cheque_unico_agencia")
+            with col_cheque3:
+                cheque_unico_conta = st.text_input("Conta", key="cheque_unico_conta")
+            with col_cheque4:
+                cheque_unico_numero = st.text_input("Cheque n", key="cheque_unico_numero")
+        else:
+            qtd_parcelas = st.session_state.get("qtd_parcelas", 4)
+            dias_atraso = st.session_state.get("dias_atraso", 30)
+            valor_parcela = valor_parcela_calculado(valor_total, int(qtd_parcelas))
+            cheque_unico_banco = st.session_state.get("cheque_unico_banco", "")
+            cheque_unico_agencia = st.session_state.get("cheque_unico_agencia", "")
+            cheque_unico_conta = st.session_state.get("cheque_unico_conta", "")
+            cheque_unico_numero = st.session_state.get("cheque_unico_numero", "")
+
+        if mostrar_formulario_cheque and mostrar_formulario_cartao:
+            st.markdown('<div class="bloco-separador"></div>', unsafe_allow_html=True)
+
+        if mostrar_formulario_cartao:
+            st.markdown("### Para Cartao de Credito")
+            col_qtd_parcelas_cartao, col_dias_parcela_cartao, col_valor_parcela_cartao = st.columns(3)
+            with col_qtd_parcelas_cartao:
+                qtd_parcelas_cartao = st.number_input("QTD parcelas (mensais)", min_value=1, step=1, key="qtd_parcelas_cartao")
+            with col_dias_parcela_cartao:
+                dias_atraso_cartao = st.selectbox(
+                    "Dias para vencimento de cada parcela",
+                    options=OPCOES_DIAS_PARCELA,
+                    key="dias_atraso_cartao",
+                )
+            with col_valor_parcela_cartao:
+                valor_parcela_cartao = st.text_input(
+                    "Valor da parcela",
+                    value=valor_parcela_calculado(valor_total, int(qtd_parcelas_cartao)),
+                    disabled=True,
+                )
+
+            st.markdown("### Tabela de vencimentos")
+            tabela_vencimentos_cartao = gerar_tabela_vencimentos(
+                data_inicial=data_leilao,
+                qtd_parcelas=int(qtd_parcelas_cartao),
+                intervalo_dias=int(dias_atraso_cartao),
+                valor_total=valor_total,
             )
+            st.dataframe(tabela_vencimentos_cartao, hide_index=True, width="stretch")
 
-        st.markdown("### Tabela de vencimentos")
-        tabela_vencimentos_cartao = gerar_tabela_vencimentos(
-            data_inicial=data_leilao,
-            qtd_parcelas=int(qtd_parcelas_cartao),
-            intervalo_dias=int(dias_atraso_cartao),
-            valor_total=valor_total,
-        )
-        st.dataframe(tabela_vencimentos_cartao, hide_index=True, width="stretch")
-
-        col_cartao1, col_cartao2, col_cartao3, col_cartao4 = st.columns(4)
-        with col_cartao1:
-            cartao_credito_banco = st.text_input("Banco", key="cartao_credito_banco")
-        with col_cartao2:
-            cartao_credito_agencia = st.text_input("Agencia", key="cartao_credito_agencia")
-        with col_cartao3:
-            cartao_credito_conta = st.text_input("Conta", key="cartao_credito_conta")
-        with col_cartao4:
-            cartao_credito_numero = st.text_input("Numero", key="cartao_credito_numero")
+            col_cartao1, col_cartao2, col_cartao3, col_cartao4 = st.columns(4)
+            with col_cartao1:
+                cartao_credito_banco = st.text_input("Banco", key="cartao_credito_banco")
+            with col_cartao2:
+                cartao_credito_agencia = st.text_input("Agencia", key="cartao_credito_agencia")
+            with col_cartao3:
+                cartao_credito_conta = st.text_input("Conta", key="cartao_credito_conta")
+            with col_cartao4:
+                cartao_credito_numero = st.text_input("Numero", key="cartao_credito_numero")
+        else:
+            qtd_parcelas_cartao = st.session_state.get("qtd_parcelas_cartao", 4)
+            dias_atraso_cartao = st.session_state.get("dias_atraso_cartao", 30)
+            valor_parcela_cartao = valor_parcela_calculado(valor_total, int(qtd_parcelas_cartao))
+            cartao_credito_banco = st.session_state.get("cartao_credito_banco", "")
+            cartao_credito_agencia = st.session_state.get("cartao_credito_agencia", "")
+            cartao_credito_conta = st.session_state.get("cartao_credito_conta", "")
+            cartao_credito_numero = st.session_state.get("cartao_credito_numero", "")
 
     with st.expander("Informacoes finais", expanded=True):
         st.markdown("### Foro e assinatura")

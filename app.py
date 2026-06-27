@@ -127,6 +127,12 @@ def formatar_data(data_valor: date) -> str:
     return data_valor.strftime("%d/%m/%Y")
 
 
+def nome_arquivo_seguro(texto: str) -> str:
+    nome_limpo = re.sub(r'[\\/:*?"<>|]+', "", str(texto)).strip()
+    nome_limpo = re.sub(r"\s+", "_", nome_limpo)
+    return nome_limpo or "sem_comprador"
+
+
 def extrair_texto_arquivo(nome_arquivo: str, conteudo: bytes) -> str:
     extensao = nome_arquivo.lower().rsplit(".", 1)[-1]
 
@@ -507,6 +513,7 @@ dados = {
 }
 
 texto_contrato = texto_padrao(dados)
+nome_comprador_arquivo = nome_arquivo_seguro(devedor_nome)
 
 pdf_bytes = gerar_contrato_pdf(texto_contrato, titulo="Contrato de Confissão de Dívida")
 docx_bytes = gerar_contrato_docx(texto_contrato, titulo="Contrato de Confissão de Dívida")
@@ -522,7 +529,7 @@ with col_preview:
         st.download_button(
             "Baixar PDF",
             data=pdf_bytes,
-            file_name="contrato_confissao_divida.pdf",
+            file_name=f"contrato_confissao_divida_{nome_comprador_arquivo}.pdf",
             mime="application/pdf",
             width="stretch",
         )
@@ -530,7 +537,7 @@ with col_preview:
         st.download_button(
             "Baixar DOCX",
             data=docx_bytes,
-            file_name="contrato_confissao_divida.docx",
+            file_name=f"contrato_confissao_divida_{nome_comprador_arquivo}.docx",
             mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
             width="stretch",
         )

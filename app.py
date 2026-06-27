@@ -538,7 +538,7 @@ with st.container():
         )
         st.dataframe(tabela_vencimentos, hide_index=True, width="stretch")
 
-        st.markdown("### Cheque único para 120 dias")
+        st.markdown("### Dados bancarios")
         col_cheque1, col_cheque2, col_cheque3, col_cheque4 = st.columns(4)
         with col_cheque1:
             cheque_unico_banco = st.text_input("Banco", key="cheque_unico_banco")
@@ -548,28 +548,6 @@ with st.container():
             cheque_unico_conta = st.text_input("Conta", key="cheque_unico_conta")
         with col_cheque4:
             cheque_unico_numero = st.text_input("Cheque nº", key="cheque_unico_numero")
-
-        st.markdown("### Cheques pré-datados parcelados")
-        parcela1_padrao = data_leilao + timedelta(days=int(dias_atraso))
-        parcela2_padrao = data_leilao + timedelta(days=int(dias_atraso) * 2)
-        parcela3_padrao = data_leilao + timedelta(days=int(dias_atraso) * 3)
-        parcela4_padrao = data_leilao + timedelta(days=int(dias_atraso) * 4)
-
-        col_p1, col_p2 = st.columns(2)
-        with col_p1:
-            parcela1_data = st.date_input("Vencimento parcela 1", value=parcela1_padrao, format="DD/MM/YYYY")
-            parcela1_cheque = st.text_input("Cheque nº parcela 1", key="parcela1_cheque")
-            parcela1_banco = st.text_input("Banco parcela 1", key="parcela1_banco")
-            parcela2_data = st.date_input("Vencimento parcela 2", value=parcela2_padrao, format="DD/MM/YYYY")
-            parcela2_cheque = st.text_input("Cheque nº parcela 2", key="parcela2_cheque")
-            parcela2_banco = st.text_input("Banco parcela 2", key="parcela2_banco")
-        with col_p2:
-            parcela3_data = st.date_input("Vencimento parcela 3", value=parcela3_padrao, format="DD/MM/YYYY")
-            parcela3_cheque = st.text_input("Cheque nº parcela 3", key="parcela3_cheque")
-            parcela3_banco = st.text_input("Banco parcela 3", key="parcela3_banco")
-            parcela4_data = st.date_input("Vencimento parcela 4", value=parcela4_padrao, format="DD/MM/YYYY")
-            parcela4_cheque = st.text_input("Cheque nº parcela 4", key="parcela4_cheque")
-            parcela4_banco = st.text_input("Banco parcela 4", key="parcela4_banco")
 
     with st.expander("Informacoes finais", expanded=True):
         st.markdown("### Foro e assinatura")
@@ -589,6 +567,20 @@ with st.container():
             testemunha2_cpf = st.text_input("CPF da testemunha 2", key="testemunha2_cpf")
 
     atualizar_preview = st.button("🔄 Atualizar pré-visualização", width="stretch")
+
+parcela_datas = [
+    data_leilao + timedelta(days=int(dias_atraso) * indice)
+    for indice in range(1, 5)
+]
+parcela1_data, parcela2_data, parcela3_data, parcela4_data = parcela_datas
+parcela1_cheque = st.session_state.get("parcela1_cheque", "")
+parcela1_banco = st.session_state.get("parcela1_banco", "")
+parcela2_cheque = st.session_state.get("parcela2_cheque", "")
+parcela2_banco = st.session_state.get("parcela2_banco", "")
+parcela3_cheque = st.session_state.get("parcela3_cheque", "")
+parcela3_banco = st.session_state.get("parcela3_banco", "")
+parcela4_cheque = st.session_state.get("parcela4_cheque", "")
+parcela4_banco = st.session_state.get("parcela4_banco", "")
 
 dados = {
     "credor_nome": credor_nome,

@@ -33,6 +33,8 @@ OPCOES_MODALIDADES_PAGAMENTO = [
     "Cartão de crédito",
 ]
 
+OPCOES_DIAS_PARCELA = [30, 60, 90, 120]
+
 MAPA_MODALIDADES_LEGADAS = {
     "Cheque Ãºnico para 120 dias": "Cheque único para 120 dias",
     "Cheques prÃ©-datados parcelados": "Cheques pré-datados parcelados",
@@ -502,7 +504,11 @@ with st.form("formulario_contrato"):
                 disabled=True,
             )
         with col_dias_parcela:
-            dias_atraso = st.number_input("Dias para vencimento de cada parcela", min_value=1, step=1, key="dias_atraso")
+            dias_atraso = st.selectbox(
+                "Dias para vencimento de cada parcela",
+                options=OPCOES_DIAS_PARCELA,
+                key="dias_atraso",
+            )
 
         st.markdown("### Cheque único para 120 dias")
         col_cheque1, col_cheque2, col_cheque3, col_cheque4 = st.columns(4)

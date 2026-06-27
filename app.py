@@ -27,6 +27,18 @@ MESES = {
     12: "dezembro",
 }
 
+OPCOES_MODALIDADES_PAGAMENTO = [
+    "Cheque único para 120 dias",
+    "Cheques pré-datados parcelados",
+    "Cartão de crédito",
+]
+
+MAPA_MODALIDADES_LEGADAS = {
+    "Cheque Ãºnico para 120 dias": "Cheque único para 120 dias",
+    "Cheques prÃ©-datados parcelados": "Cheques pré-datados parcelados",
+    "CartÃ£o de crÃ©dito": "Cartão de crédito",
+}
+
 
 st.set_page_config(
     page_title="Gerador de Contrato",
@@ -259,6 +271,21 @@ def inicializar_estado_formulario() -> None:
     for chave, valor in defaults.items():
         st.session_state.setdefault(chave, valor)
 
+    modalidades = st.session_state.get("modalidades_pagamento", [])
+    if not isinstance(modalidades, list):
+        modalidades = [modalidades] if modalidades else []
+
+    modalidades_normalizadas = []
+    for modalidade in modalidades:
+        modalidade_normalizada = MAPA_MODALIDADES_LEGADAS.get(modalidade, modalidade)
+        if modalidade_normalizada in OPCOES_MODALIDADES_PAGAMENTO:
+            modalidades_normalizadas.append(modalidade_normalizada)
+
+    if not modalidades_normalizadas:
+        modalidades_normalizadas = ["Cheque único para 120 dias"]
+
+    st.session_state["modalidades_pagamento"] = modalidades_normalizadas
+
 
 def limpar_dados_credor() -> None:
     st.session_state["credor_nome"] = ""
@@ -450,8 +477,7 @@ with st.form("formulario_contrato"):
         st.markdown("### Pagamento")
         modalidades_pagamento = st.multiselect(
             "Modalidade escolhida",
-            ["Cheque ?nico para 120 dias", "Cheques pr?-datados parcelados", "Cart?o de cr?dito"],
-            default=st.session_state["modalidades_pagamento"],
+            OPCOES_MODALIDADES_PAGAMENTO,
             key="modalidades_pagamento",
         )
         valor_parcela = st.text_input("Valor da parcela", key="valor_parcela")

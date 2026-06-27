@@ -436,74 +436,75 @@ with st.form("formulario_contrato"):
 
     st.markdown('<div class="bloco-separador"></div>', unsafe_allow_html=True)
 
-    col_divida, col_pagamento, col_assinatura = st.columns(3)
-    with col_divida:
-        st.markdown("### Dívida")
-        valor_total = st.text_input("Valor total", key="valor_total")
-        valor_extenso = st.text_input("Valor por extenso", valor_por_extenso(valor_total), disabled=True)
-        data_leilao = st.date_input("Data do leilão", value=data_leilao_padrao, format="DD/MM/YYYY")
-        lotes = st.text_input("Número dos lotes", "")
+    with st.expander("Financeiro", expanded=True):
+        col_divida, col_pagamento = st.columns(2)
+        with col_divida:
+            st.markdown("### Dívida")
+            valor_total = st.text_input("Valor total", key="valor_total")
+            valor_extenso = st.text_input("Valor por extenso", valor_por_extenso(valor_total), disabled=True)
+            data_leilao = st.date_input("Data do leilão", value=data_leilao_padrao, format="DD/MM/YYYY")
+            lotes = st.text_input("Número dos lotes", "")
 
-    with col_pagamento:
-        st.markdown("### Pagamento")
-        modalidades_pagamento = st.multiselect(
-            "Modalidade escolhida",
-            ["Cheque único para 120 dias", "Cheques pré-datados parcelados", "Cartão de crédito"],
-            default=st.session_state["modalidades_pagamento"],
-            key="modalidades_pagamento",
-        )
-        valor_parcela = st.text_input("Valor da parcela", key="valor_parcela")
-        dias_atraso = st.number_input("Dias para vencimento antecipado", min_value=1, key="dias_atraso")
+        with col_pagamento:
+            st.markdown("### Pagamento")
+            modalidades_pagamento = st.multiselect(
+                "Modalidade escolhida",
+                ["Cheque único para 120 dias", "Cheques pré-datados parcelados", "Cartão de crédito"],
+                default=st.session_state["modalidades_pagamento"],
+                key="modalidades_pagamento",
+            )
+            valor_parcela = st.text_input("Valor da parcela", key="valor_parcela")
+            dias_atraso = st.number_input("Dias para vencimento antecipado", min_value=1, key="dias_atraso")
 
-    with col_assinatura:
+        st.markdown("### Cheque único para 120 dias")
+        col_cheque1, col_cheque2, col_cheque3, col_cheque4 = st.columns(4)
+        with col_cheque1:
+            cheque_unico_banco = st.text_input("Banco", key="cheque_unico_banco")
+        with col_cheque2:
+            cheque_unico_agencia = st.text_input("Agência", key="cheque_unico_agencia")
+        with col_cheque3:
+            cheque_unico_conta = st.text_input("Conta", key="cheque_unico_conta")
+        with col_cheque4:
+            cheque_unico_numero = st.text_input("Cheque nº", key="cheque_unico_numero")
+
+        st.markdown("### Cheques pré-datados parcelados")
+        parcela1_padrao = data_leilao + timedelta(days=30)
+        parcela2_padrao = data_leilao + timedelta(days=60)
+        parcela3_padrao = data_leilao + timedelta(days=90)
+        parcela4_padrao = data_leilao + timedelta(days=120)
+
+        col_p1, col_p2 = st.columns(2)
+        with col_p1:
+            parcela1_data = st.date_input("Vencimento parcela 1", value=parcela1_padrao, format="DD/MM/YYYY")
+            parcela1_cheque = st.text_input("Cheque nº parcela 1", key="parcela1_cheque")
+            parcela1_banco = st.text_input("Banco parcela 1", key="parcela1_banco")
+            parcela2_data = st.date_input("Vencimento parcela 2", value=parcela2_padrao, format="DD/MM/YYYY")
+            parcela2_cheque = st.text_input("Cheque nº parcela 2", key="parcela2_cheque")
+            parcela2_banco = st.text_input("Banco parcela 2", key="parcela2_banco")
+        with col_p2:
+            parcela3_data = st.date_input("Vencimento parcela 3", value=parcela3_padrao, format="DD/MM/YYYY")
+            parcela3_cheque = st.text_input("Cheque nº parcela 3", key="parcela3_cheque")
+            parcela3_banco = st.text_input("Banco parcela 3", key="parcela3_banco")
+            parcela4_data = st.date_input("Vencimento parcela 4", value=parcela4_padrao, format="DD/MM/YYYY")
+            parcela4_cheque = st.text_input("Cheque nº parcela 4", key="parcela4_cheque")
+            parcela4_banco = st.text_input("Banco parcela 4", key="parcela4_banco")
+
+    with st.expander("Informacoes finais", expanded=True):
         st.markdown("### Foro e assinatura")
         foro = st.text_input("Comarca/UF", key="foro")
-        municipio_assinatura = st.text_input("Município da assinatura", key="municipio_assinatura")
+        municipio_assinatura = st.text_input("Municipio da assinatura", key="municipio_assinatura")
         data_assinatura = st.date_input("Data da assinatura", value=date.today(), format="DD/MM/YYYY")
 
-    st.markdown("### Cheque único para 120 dias")
-    col_cheque1, col_cheque2, col_cheque3, col_cheque4 = st.columns(4)
-    with col_cheque1:
-        cheque_unico_banco = st.text_input("Banco", key="cheque_unico_banco")
-    with col_cheque2:
-        cheque_unico_agencia = st.text_input("Agência", key="cheque_unico_agencia")
-    with col_cheque3:
-        cheque_unico_conta = st.text_input("Conta", key="cheque_unico_conta")
-    with col_cheque4:
-        cheque_unico_numero = st.text_input("Cheque nº", key="cheque_unico_numero")
+        col_testemunha1, col_testemunha2 = st.columns(2)
+        with col_testemunha1:
+            st.markdown("### Testemunha 1")
+            testemunha1_nome = st.text_input("Nome da testemunha 1", key="testemunha1_nome")
+            testemunha1_cpf = st.text_input("CPF da testemunha 1", key="testemunha1_cpf")
 
-    st.markdown("### Cheques pré-datados parcelados")
-    parcela1_padrao = data_leilao + timedelta(days=30)
-    parcela2_padrao = data_leilao + timedelta(days=60)
-    parcela3_padrao = data_leilao + timedelta(days=90)
-    parcela4_padrao = data_leilao + timedelta(days=120)
-
-    col_p1, col_p2 = st.columns(2)
-    with col_p1:
-        parcela1_data = st.date_input("Vencimento parcela 1", value=parcela1_padrao, format="DD/MM/YYYY")
-        parcela1_cheque = st.text_input("Cheque nº parcela 1", key="parcela1_cheque")
-        parcela1_banco = st.text_input("Banco parcela 1", key="parcela1_banco")
-        parcela2_data = st.date_input("Vencimento parcela 2", value=parcela2_padrao, format="DD/MM/YYYY")
-        parcela2_cheque = st.text_input("Cheque nº parcela 2", key="parcela2_cheque")
-        parcela2_banco = st.text_input("Banco parcela 2", key="parcela2_banco")
-    with col_p2:
-        parcela3_data = st.date_input("Vencimento parcela 3", value=parcela3_padrao, format="DD/MM/YYYY")
-        parcela3_cheque = st.text_input("Cheque nº parcela 3", key="parcela3_cheque")
-        parcela3_banco = st.text_input("Banco parcela 3", key="parcela3_banco")
-        parcela4_data = st.date_input("Vencimento parcela 4", value=parcela4_padrao, format="DD/MM/YYYY")
-        parcela4_cheque = st.text_input("Cheque nº parcela 4", key="parcela4_cheque")
-        parcela4_banco = st.text_input("Banco parcela 4", key="parcela4_banco")
-
-    col_testemunha1, col_testemunha2 = st.columns(2)
-    with col_testemunha1:
-        st.markdown("### Testemunha 1")
-        testemunha1_nome = st.text_input("Nome da testemunha 1", key="testemunha1_nome")
-        testemunha1_cpf = st.text_input("CPF da testemunha 1", key="testemunha1_cpf")
-
-    with col_testemunha2:
-        st.markdown("### Testemunha 2")
-        testemunha2_nome = st.text_input("Nome da testemunha 2", key="testemunha2_nome")
-        testemunha2_cpf = st.text_input("CPF da testemunha 2", key="testemunha2_cpf")
+        with col_testemunha2:
+            st.markdown("### Testemunha 2")
+            testemunha2_nome = st.text_input("Nome da testemunha 2", key="testemunha2_nome")
+            testemunha2_cpf = st.text_input("CPF da testemunha 2", key="testemunha2_cpf")
 
     atualizar_preview = st.form_submit_button("🔄 Atualizar pré-visualização", width="stretch")
 

@@ -541,6 +541,7 @@ with st.container():
                     "Valor da parcela",
                     value=valor_parcela_calculado(valor_total, int(qtd_parcelas)),
                     disabled=True,
+                    key="valor_parcela_cheque_exibicao",
                 )
 
             st.markdown("### Tabela de vencimentos")
@@ -590,6 +591,7 @@ with st.container():
                     "Valor da parcela",
                     value=valor_parcela_calculado(valor_total, int(qtd_parcelas_cartao)),
                     disabled=True,
+                    key="valor_parcela_cartao_exibicao",
                 )
 
             st.markdown("### Tabela de vencimentos")

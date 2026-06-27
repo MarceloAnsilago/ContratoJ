@@ -492,16 +492,17 @@ with st.form("formulario_contrato"):
             OPCOES_MODALIDADES_PAGAMENTO,
             key="modalidades_pagamento",
         )
-        col_pagamento_config, col_pagamento_valor = st.columns(2)
-        with col_pagamento_config:
+        col_qtd_parcelas, col_valor_parcela, col_dias_parcela = st.columns(3)
+        with col_qtd_parcelas:
             qtd_parcelas = st.number_input("QTD parcelas", min_value=1, step=1, key="qtd_parcelas")
-            dias_atraso = st.number_input("Dias para vencimento de cada parcela", min_value=1, step=1, key="dias_atraso")
-        with col_pagamento_valor:
+        with col_valor_parcela:
             valor_parcela = st.text_input(
                 "Valor da parcela",
                 value=valor_parcela_calculado(valor_total, int(qtd_parcelas)),
                 disabled=True,
             )
+        with col_dias_parcela:
+            dias_atraso = st.number_input("Dias para vencimento de cada parcela", min_value=1, step=1, key="dias_atraso")
 
         st.markdown("### Cheque único para 120 dias")
         col_cheque1, col_cheque2, col_cheque3, col_cheque4 = st.columns(4)

@@ -536,7 +536,7 @@ with st.form("formulario_contrato"):
             intervalo_dias=int(dias_atraso),
             valor_total=valor_total,
         )
-        st.table(tabela_vencimentos)
+        st.dataframe(tabela_vencimentos, hide_index=True, width="stretch")
 
         st.markdown("### Cheque único para 120 dias")
         col_cheque1, col_cheque2, col_cheque3, col_cheque4 = st.columns(4)

@@ -385,12 +385,12 @@ with st.form("formulario_contrato"):
     botoes_col1, botoes_col2, botoes_col3 = st.columns([1, 1, 1])
     with botoes_col1:
         st.markdown('<div class="botao-credor-wrap">', unsafe_allow_html=True)
-        limpar_credor = st.form_submit_button("Limpar credor", width="stretch")
+        st.form_submit_button("Limpar credor", width="stretch", on_click=limpar_dados_credor)
         st.markdown("</div>", unsafe_allow_html=True)
     with botoes_col2:
         st.write("")
     with botoes_col3:
-        limpar_devedor = st.form_submit_button("Limpar devedor", width="stretch")
+        st.form_submit_button("Limpar devedor", width="stretch", on_click=limpar_dados_devedor)
 
     st.markdown('<div class="bloco-separador"></div>', unsafe_allow_html=True)
 
@@ -464,14 +464,6 @@ with st.form("formulario_contrato"):
         testemunha2_cpf = st.text_input("CPF da testemunha 2", key="testemunha2_cpf")
 
     atualizar_preview = st.form_submit_button("Atualizar pré-visualização", width="stretch")
-
-if limpar_credor:
-    limpar_dados_credor()
-    st.rerun()
-
-if limpar_devedor:
-    limpar_dados_devedor()
-    st.rerun()
 
 dados = {
     "credor_nome": credor_nome,

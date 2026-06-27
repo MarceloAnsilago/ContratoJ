@@ -378,13 +378,13 @@ with st.form("formulario_contrato"):
             devedor_rg = st.text_input("RG do devedor", key="devedor_rg")
         devedor_endereco = st.text_area("Endereço do devedor", key="devedor_endereco", height=95)
 
-    botoes_col1, botoes_col2, botoes_col3 = st.columns([1, 1, 4])
+    botoes_col1, botoes_col2, botoes_col3 = st.columns([4, 1, 1])
     with botoes_col1:
-        limpar_credor = st.form_submit_button("Limpar credor", width="stretch")
-    with botoes_col2:
-        limpar_devedor = st.form_submit_button("Limpar devedor", width="stretch")
-    with botoes_col3:
         st.markdown('<div class="bloco-separador"></div>', unsafe_allow_html=True)
+    with botoes_col2:
+        limpar_credor = st.form_submit_button("Limpar credor", width="stretch")
+    with botoes_col3:
+        limpar_devedor = st.form_submit_button("Limpar devedor", width="stretch")
 
     col_divida, col_pagamento, col_assinatura = st.columns(3)
     with col_divida:

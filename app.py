@@ -462,7 +462,7 @@ if contrato_importado is not None:
 
 data_leilao_padrao = date.today()
 
-with st.form("formulario_contrato"):
+with st.container():
     st.subheader("Dados do contrato")
 
     with st.expander("Credor e devedor", expanded=True):
@@ -486,12 +486,12 @@ with st.form("formulario_contrato"):
         botoes_col1, botoes_col2, botoes_col3 = st.columns([1, 1, 1])
         with botoes_col1:
             st.markdown('<div class="botao-credor-wrap">', unsafe_allow_html=True)
-            st.form_submit_button("Limpar credor", width="stretch", on_click=limpar_dados_credor)
+            st.button("Limpar credor", width="stretch", on_click=limpar_dados_credor)
             st.markdown("</div>", unsafe_allow_html=True)
         with botoes_col2:
             st.write("")
         with botoes_col3:
-            st.form_submit_button("Limpar devedor", width="stretch", on_click=limpar_dados_devedor)
+            st.button("Limpar devedor", width="stretch", on_click=limpar_dados_devedor)
 
     st.markdown('<div class="bloco-separador"></div>', unsafe_allow_html=True)
 
@@ -588,7 +588,7 @@ with st.form("formulario_contrato"):
             testemunha2_nome = st.text_input("Nome da testemunha 2", key="testemunha2_nome")
             testemunha2_cpf = st.text_input("CPF da testemunha 2", key="testemunha2_cpf")
 
-    atualizar_preview = st.form_submit_button("🔄 Atualizar pré-visualização", width="stretch")
+    atualizar_preview = st.button("🔄 Atualizar pré-visualização", width="stretch")
 
 dados = {
     "credor_nome": credor_nome,

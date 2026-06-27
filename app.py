@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, timedelta
 from decimal import Decimal, InvalidOperation
 
 import streamlit as st
@@ -97,133 +97,119 @@ def valor_por_extenso(valor: str) -> str:
     numero = valor_monetario_para_decimal(valor)
     if numero is None:
         return "VALOR POR EXTENSO"
-
     return num2words(numero, lang="pt_BR", to="currency")
 
 
-def texto_padrao(dados: dict) -> str:
-    def uma_linha(valor: str) -> str:
-        return " ".join(str(valor).split())
+def numero_por_extenso(numero: int) -> str:
+    return num2words(numero, lang="pt_BR")
 
+
+def campo_ou_linha(valor: str, placeholder: str = "_____________________________") -> str:
+    return " ".join(str(valor).split()) if str(valor).strip() else placeholder
+
+
+def formatar_data(data_valor: date) -> str:
+    return data_valor.strftime("%d/%m/%Y")
+
+
+def texto_padrao(dados: dict) -> str:
     def negrito(valor: str) -> str:
         return f"[[B]]{valor}[[/B]]"
 
     modalidades_pagamento = dados["modalidades_pagamento"]
     opcao1 = negrito("X") if "Cheque único para 120 dias" in modalidades_pagamento else " "
-    opcao2 = negrito("X") if "Cheques pré-datados" in modalidades_pagamento else " "
+    opcao2 = negrito("X") if "Cheques pré-datados parcelados" in modalidades_pagamento else " "
     opcao3 = negrito("X") if "Cartão de crédito" in modalidades_pagamento else " "
-
-    garantias = {
-        "Nota promissória": negrito("X") if "Nota promissória" in dados["garantias"] else " ",
-        "Avalista(s)": negrito("X") if "Avalista(s)" in dados["garantias"] else " ",
-        "Hipoteca": negrito("X") if "Hipoteca" in dados["garantias"] else " ",
-        "Penhor de animais": negrito("X") if "Penhor de animais" in dados["garantias"] else " ",
-        "Outra garantia": negrito("X") if dados["outra_garantia"].strip() else " ",
-    }
-
-    outra_garantia = dados["outra_garantia"] or "_____________________________"
 
     return f"""CONTRATO DE CONFISSÃO DE DÍVIDA
 
 Pelo presente instrumento particular, de um lado:
 
-CREDOR: {negrito(dados["credor_nome"])}, inscrito(a) no CPF/CNPJ nº {negrito(dados["credor_doc"])}, com endereço à {negrito(uma_linha(dados["credor_endereco"]))};
+CREDOR: {negrito(campo_ou_linha(dados["credor_nome"], "NOME DO VENDEDOR OU LEILOEIRA"))}, inscrito(a) no CPF/CNPJ nº {negrito(campo_ou_linha(dados["credor_doc"], "XXXXXXXXXXXX"))}, com endereço à {negrito(campo_ou_linha(dados["credor_endereco"], "ENDEREÇO COMPLETO"))};
 
 e, de outro lado:
 
-DEVEDOR: {negrito(dados["devedor_nome"])}, inscrito(a) no CPF nº {negrito(dados["devedor_cpf"])}, portador(a) do RG nº {negrito(dados["devedor_rg"])}, residente e domiciliado(a) à {negrito(uma_linha(dados["devedor_endereco"]))};
+DEVEDOR: {negrito(campo_ou_linha(dados["devedor_nome"]))}, inscrito(a) no CPF nº {negrito(campo_ou_linha(dados["devedor_cpf"]))}, portador(a) do RG nº {negrito(campo_ou_linha(dados["devedor_rg"]))}, residente e domiciliado(a) à {negrito(campo_ou_linha(dados["devedor_endereco"]))};
 
-têm entre si justo e contratado o presente CONTRATO DE CONFISSÃO DE DÍVIDA, mediante as cláusulas e condições seguintes:
+As partes acima qualificadas têm entre si justo e contratado o presente instrumento, que se regerá pelas cláusulas e condições seguintes:
 
 CLÁUSULA PRIMEIRA - DA ORIGEM DA DÍVIDA
 
-O DEVEDOR reconhece e confessa ser legítimo devedor da quantia de R$ {negrito(dados["valor_total"])} ({negrito(dados["valor_extenso"])}), decorrente da aquisição de animais bovinos realizada em leilão promovido em {negrito(dados["data_leilao"])}, conforme lote(s) nº {negrito(dados["lotes"])}, adquiridos pelo DEVEDOR.
+O DEVEDOR reconhece, confessa e assume ser legítimo devedor da quantia líquida, certa e exigível de R$ {negrito(campo_ou_linha(dados["valor_total"], "___________________"))} ({negrito(campo_ou_linha(dados["valor_extenso"], "_______________________________________________________"))}), decorrente da aquisição de animais bovinos realizada em leilão promovido em {negrito(dados["data_leilao"])}, conforme lote(s) nº {negrito(campo_ou_linha(dados["lotes"], "_______________________________"))}, adquiridos pelo DEVEDOR.
 
 CLÁUSULA SEGUNDA - DO VALOR E FORMA DE PAGAMENTO
 
-O valor total da dívida confessada é de R$ {negrito(dados["valor_total"])} ({negrito(dados["valor_extenso"])}), referente à aquisição de animais bovinos em leilão, cujo pagamento será realizado por uma das modalidades abaixo, escolhida pelo DEVEDOR no ato da assinatura deste instrumento:
+O valor total da dívida confessada é de R$ {negrito(campo_ou_linha(dados["valor_total"], "__________________"))} ({negrito(campo_ou_linha(dados["valor_extenso"], "________________________________________________________"))}), cujo pagamento será realizado por uma das modalidades abaixo, expressamente escolhida e assinalada pelo DEVEDOR no ato da assinatura deste instrumento:
 
-({opcao1}) Opção 1 - Cheque único para 120 dias
+[{opcao1}] Opção 1 - Cheque único para 120 dias:
 
 Pagamento mediante a entrega de 01 (um) cheque pré-datado para vencimento em 120 (cento e vinte) dias contados da data da aquisição dos animais.
 
-({opcao2}) Opção 2 - Pagamento por meio de cheques pré-datados
+Dados do Cheque: Banco: {negrito(campo_ou_linha(dados["cheque_unico_banco"], "_______"))} | Agência: {negrito(campo_ou_linha(dados["cheque_unico_agencia"], "___________"))} | Conta: {negrito(campo_ou_linha(dados["cheque_unico_conta"], "____________"))} | Cheque nº: {negrito(campo_ou_linha(dados["cheque_unico_numero"], "______________"))}.
 
-O valor total será quitado mediante a entrega de 04 (quatro) cheques pré-datados, correspondentes a parcelas iguais e sucessivas, com vencimentos em:
+[{opcao2}] Opção 2 - Pagamento por meio de cheques pré-datados parcelados
 
-• 30 (trinta) dias;
-• 60 (sessenta) dias;
-• 90 (noventa) dias;
-• 120 (cento e vinte) dias.
+O valor total será quitado mediante a entrega de 04 (quatro) cheques pré-datados, correspondentes a parcelas iguais e sucessivas de R$ {negrito(campo_ou_linha(dados["valor_parcela"], "VALOR DA PARCELA"))}, com os seguintes vencimentos:
 
-Cada parcela corresponderá ao valor de R$ {negrito(dados["valor_parcela"])}.
+{negrito(dados["parcela1_data"])} (30 dias) - Cheque nº: {negrito(campo_ou_linha(dados["parcela1_cheque"], "_______________"))} | Banco: {negrito(campo_ou_linha(dados["parcela1_banco"], "_________"))}
+{negrito(dados["parcela2_data"])} (60 dias) - Cheque nº: {negrito(campo_ou_linha(dados["parcela2_cheque"], "_______________"))} | Banco: {negrito(campo_ou_linha(dados["parcela2_banco"], "_________"))}
+{negrito(dados["parcela3_data"])} (90 dias) - Cheque nº: {negrito(campo_ou_linha(dados["parcela3_cheque"], "_______________"))} | Banco: {negrito(campo_ou_linha(dados["parcela3_banco"], "_________"))}
+{negrito(dados["parcela4_data"])} (120 dias) - Cheque nº: {negrito(campo_ou_linha(dados["parcela4_cheque"], "_______________"))} | Banco: {negrito(campo_ou_linha(dados["parcela4_banco"], "_________"))}
 
-({opcao3}) Opção 3 - Pagamento mediante cartão de crédito
+[{opcao3}] Opção 3 - Pagamento mediante cartão de crédito: O valor total da aquisição será pago por meio de cartão de crédito, em até 04 (quatro) parcelas mensais, conforme aprovação da operadora do cartão e condições financeiras vigentes na data da operação.
 
-O valor total da aquisição será pago por meio de cartão de crédito, em até 04 (quatro) parcelas mensais, conforme aprovação da operadora do cartão e condições financeiras vigentes na data da operação.
+Parágrafo primeiro. A modalidade de pagamento escolhida pelo DEVEDOR e assinalada acima integrará este contrato para todos os efeitos legais.
 
-Parágrafo Único. A modalidade de pagamento escolhida pelo DEVEDOR deverá ser assinalada acima e passará a integrar este contrato para todos os efeitos legais.
+CLÁUSULA TERCEIRA - DA MORA E ENCARGOS INDENIZATÓRIOS
 
-CLÁUSULA TERCEIRA - DA MORA
+O não pagamento de qualquer parcela ou título nas datas de seus respectivos vencimentos constituirá o DEVEDOR em mora, independentemente de notificação judicial ou extrajudicial, incidindo sobre o valor do débito os seguintes encargos: I - Multa moratória e irredutível de 2% (dois por cento) sobre o valor da parcela em atraso; II - Juros de mora de 1% (um por cento) ao mês, calculados pro rata die (proporcionalmente aos dias de atraso); III - Correção monetária calculada com base na variação positiva do IGP-M/FGV (ou índice oficial que venha a substituí-lo), acumulada desde a data do vencimento até o efetivo pagamento.
 
-O não pagamento de qualquer parcela em seu vencimento implicará:
-
-I - multa de 2% (dois por cento) sobre o valor da parcela em atraso;
-
-II - juros de mora de 1% (um por cento) ao mês, calculados proporcionalmente aos dias de atraso;
-
-III - correção monetária pelo índice oficial aplicável.
+Parágrafo Único. Caso o CREDOR precise recorrer a serviços advocatícios ou empresas de cobrança para o recebimento do crédito, o DEVEDOR responderá, além do principal e encargos, pelo pagamento das custas, despesas desembolsadas e honorários advocatícios, estes fixados em 10% (dez por cento) para cobrança extrajudicial e 20% (vinte por cento) em caso de ajuizamento de ação judicial.
 
 CLÁUSULA QUARTA - DO VENCIMENTO ANTECIPADO
 
-O atraso superior a {negrito(dados["dias_atraso"])} dias no pagamento de qualquer parcela acarretará o vencimento antecipado das parcelas vincendas, tornando exigível o saldo devedor integral, independentemente de notificação judicial ou extrajudicial.
+O atraso superior a {negrito(str(dados["dias_atraso"]))} ({negrito(dados["dias_atraso_extenso"])}) dias no pagamento de qualquer das parcelas pactuadas, ou a ocorrência de devolução por falta de fundos de qualquer dos cheques emitidos, acarretará o vencimento antecipado de todas as parcelas vincendas, tornando-se imediatamente exigível o saldo devedor integral, acrescido de todas as penalidades previstas na Cláusula Terceira, independentemente de prévia notificação ou aviso.
 
-CLÁUSULA QUINTA - DA GARANTIA
+CLÁUSULA QUINTA - DA CONFISSÃO IRREVOGÁVEL E TÍTULO EXECUTIVO
 
-Para garantia do cumprimento das obrigações assumidas, o DEVEDOR oferece como garantia:
+O DEVEDOR declara reconhecer expressamente a existência, legitimidade, certeza, liquidez e exigibilidade da dívida descrita neste instrumento. Este contrato é firmado em caráter irrevogável e irretratável, constituindo-se em Título Executivo Extrajudicial, nos termos do Artigo 784, inciso III, do Código de Processo Civil brasileiro, apto a embasar Ação de Execução imediata.
 
-({garantias["Nota promissória"]}) Nota promissória;
-({garantias["Avalista(s)"]}) Avalista(s);
-({garantias["Hipoteca"]}) Hipoteca;
-({garantias["Penhor de animais"]}) Penhor de animais;
-({garantias["Outra garantia"]}) Outra garantia: {negrito(outra_garantia)}.
+CLÁUSULA SEXTA - DAS ASSINATURAS ELETRÔNICAS
 
-CLÁUSULA SEXTA - DA CONFISSÃO IRREVOGÁVEL
-
-O DEVEDOR declara reconhecer expressamente a existência, legitimidade, liquidez e exigibilidade da dívida descrita neste instrumento, renunciando a qualquer contestação futura quanto à sua origem e valor.
+As partes declaram e concordam que este contrato poderá ser assinado eletronicamente por meio de plataformas de assinatura digital, sendo as assinaturas consideradas válidas, íntegras e plenamente eficazes para todos os fins de direito, nos termos da Medida Provisória nº 2.200-2/2001 e da Lei nº 14.063/2020.
 
 CLÁUSULA SÉTIMA - DO FORO
 
-Fica eleito o foro da Comarca de {negrito(dados["foro"])}, com renúncia a qualquer outro, por mais privilegiado que seja, para dirimir eventuais controvérsias decorrentes deste contrato.
+Fica eleito o foro da Comarca de {negrito(campo_ou_linha(dados["foro"], "São Francisco do Guaporé - RO"))}, com renúncia expressa a qualquer outro, por mais privilegiado que seja, para dirimir eventuais controvérsias decorrentes deste contrato.
 
-E, por estarem justos e contratados, firmam o presente instrumento em duas vias de igual teor e forma, juntamente com duas testemunhas.
+E, por estarem assim justos e contratados, firmam o presente instrumento em 02 (duas) vias de igual teor e forma, na presença de 02 (duas) testemunhas abaixo assinadas.
 
-{negrito(dados["municipio_assinatura"])}, {negrito(dados["dia_assinatura"])} de {negrito(dados["mes_assinatura"])} de {negrito(dados["ano_assinatura"])}.
+{negrito(campo_ou_linha(dados["municipio_assinatura"], "São Francisco do Guaporé - RO"))}, {negrito(dados["dia_assinatura"])} de {negrito(dados["mes_assinatura"])} de {negrito(dados["ano_assinatura"])}.
 
 
-________________________________________
+______________________________________________
 CREDOR
-CPF/CNPJ: {negrito(dados["credor_doc"])}
 
 
-________________________________________
+______________________________________________
 DEVEDOR
-CPF: {negrito(dados["devedor_cpf"])}
 
 
-TESTEMUNHAS
-
-________________________________________
-1. Nome: {negrito(dados["testemunha1_nome"])}
-CPF: {negrito(dados["testemunha1_cpf"])}
+TESTEMUNHAS:
 
 ________________________________________
-2. Nome: {negrito(dados["testemunha2_nome"])}
-CPF: {negrito(dados["testemunha2_cpf"])}
+Nome: {negrito(campo_ou_linha(dados["testemunha1_nome"], ""))}
+CPF: {negrito(campo_ou_linha(dados["testemunha1_cpf"], ""))}
+
+________________________________________
+Nome: {negrito(campo_ou_linha(dados["testemunha2_nome"], ""))}
+CPF: {negrito(campo_ou_linha(dados["testemunha2_cpf"], ""))}
 """
 
 
 st.title("Contrato de Confissão de Dívida")
+
+data_leilao_padrao = date.today()
 
 with st.form("formulario_contrato"):
     st.subheader("Dados do contrato")
@@ -237,56 +223,81 @@ with st.form("formulario_contrato"):
 
     with col_devedor:
         st.markdown("### Devedor")
-        devedor_nome = st.text_input("Nome do comprador", "NOME DO COMPRADOR")
+        devedor_nome = st.text_input("Nome do comprador", "")
         devedor_doc_col, devedor_rg_col = st.columns(2)
         with devedor_doc_col:
-            devedor_cpf = st.text_input("CPF do devedor", "XXXXXXXXXXXX")
+            devedor_cpf = st.text_input("CPF do devedor", "")
         with devedor_rg_col:
-            devedor_rg = st.text_input("RG do devedor", "XXXXXXXXXXXX")
-        devedor_endereco = st.text_area("Endereço do devedor", "ENDEREÇO COMPLETO", height=95)
+            devedor_rg = st.text_input("RG do devedor", "")
+        devedor_endereco = st.text_area("Endereço do devedor", "", height=95)
 
-    col_divida, col_pagamento, col_garantia = st.columns(3)
+    col_divida, col_pagamento, col_assinatura = st.columns(3)
     with col_divida:
         st.markdown("### Dívida")
-        valor_total = st.text_input("Valor total", "VALOR TOTAL")
+        valor_total = st.text_input("Valor total", "")
         valor_extenso = st.text_input("Valor por extenso", valor_por_extenso(valor_total), disabled=True)
-        data_leilao = st.date_input("Data do leilão", value=date.today(), format="DD/MM/YYYY")
-        lotes = st.text_input("Número dos lotes", "NÚMERO DOS LOTES")
+        data_leilao = st.date_input("Data do leilão", value=data_leilao_padrao, format="DD/MM/YYYY")
+        lotes = st.text_input("Número dos lotes", "")
 
     with col_pagamento:
         st.markdown("### Pagamento")
         modalidades_pagamento = st.multiselect(
             "Modalidade escolhida",
-            ["Cheque único para 120 dias", "Cheques pré-datados", "Cartão de crédito"],
+            ["Cheque único para 120 dias", "Cheques pré-datados parcelados", "Cartão de crédito"],
             default=["Cheque único para 120 dias"],
         )
-        valor_parcela = st.text_input("Valor da parcela", "VALOR DA PARCELA")
+        valor_parcela = st.text_input("Valor da parcela", "")
         dias_atraso = st.number_input("Dias para vencimento antecipado", min_value=1, value=30)
 
-    with col_garantia:
-        st.markdown("### Garantia")
-        garantias = st.multiselect(
-            "Garantias oferecidas",
-            ["Nota promissória", "Avalista(s)", "Hipoteca", "Penhor de animais"],
-        )
-        outra_garantia = st.text_input("Outra garantia", "")
-
-    col_foro, col_testemunha1, col_testemunha2 = st.columns(3)
-    with col_foro:
+    with col_assinatura:
         st.markdown("### Foro e assinatura")
-        foro = st.text_input("Comarca/UF", "MUNICÍPIO/UF")
-        municipio_assinatura = st.text_input("Município da assinatura", "Município")
+        foro = st.text_input("Comarca/UF", "São Francisco do Guaporé - RO")
+        municipio_assinatura = st.text_input("Município da assinatura", "São Francisco do Guaporé - RO")
         data_assinatura = st.date_input("Data da assinatura", value=date.today(), format="DD/MM/YYYY")
 
+    st.markdown("### Cheque único para 120 dias")
+    col_cheque1, col_cheque2, col_cheque3, col_cheque4 = st.columns(4)
+    with col_cheque1:
+        cheque_unico_banco = st.text_input("Banco", "")
+    with col_cheque2:
+        cheque_unico_agencia = st.text_input("Agência", "")
+    with col_cheque3:
+        cheque_unico_conta = st.text_input("Conta", "")
+    with col_cheque4:
+        cheque_unico_numero = st.text_input("Cheque nº", "")
+
+    st.markdown("### Cheques pré-datados parcelados")
+    parcela1_padrao = data_leilao + timedelta(days=30)
+    parcela2_padrao = data_leilao + timedelta(days=60)
+    parcela3_padrao = data_leilao + timedelta(days=90)
+    parcela4_padrao = data_leilao + timedelta(days=120)
+
+    col_p1, col_p2 = st.columns(2)
+    with col_p1:
+        parcela1_data = st.date_input("Vencimento parcela 1", value=parcela1_padrao, format="DD/MM/YYYY")
+        parcela1_cheque = st.text_input("Cheque nº parcela 1", "")
+        parcela1_banco = st.text_input("Banco parcela 1", "")
+        parcela2_data = st.date_input("Vencimento parcela 2", value=parcela2_padrao, format="DD/MM/YYYY")
+        parcela2_cheque = st.text_input("Cheque nº parcela 2", "")
+        parcela2_banco = st.text_input("Banco parcela 2", "")
+    with col_p2:
+        parcela3_data = st.date_input("Vencimento parcela 3", value=parcela3_padrao, format="DD/MM/YYYY")
+        parcela3_cheque = st.text_input("Cheque nº parcela 3", "")
+        parcela3_banco = st.text_input("Banco parcela 3", "")
+        parcela4_data = st.date_input("Vencimento parcela 4", value=parcela4_padrao, format="DD/MM/YYYY")
+        parcela4_cheque = st.text_input("Cheque nº parcela 4", "")
+        parcela4_banco = st.text_input("Banco parcela 4", "")
+
+    col_testemunha1, col_testemunha2 = st.columns(2)
     with col_testemunha1:
         st.markdown("### Testemunha 1")
-        testemunha1_nome = st.text_input("Nome da testemunha 1", "____________________________")
-        testemunha1_cpf = st.text_input("CPF da testemunha 1", "_____________________________")
+        testemunha1_nome = st.text_input("Nome da testemunha 1", "")
+        testemunha1_cpf = st.text_input("CPF da testemunha 1", "")
 
     with col_testemunha2:
         st.markdown("### Testemunha 2")
-        testemunha2_nome = st.text_input("Nome da testemunha 2", "____________________________")
-        testemunha2_cpf = st.text_input("CPF da testemunha 2", "_____________________________")
+        testemunha2_nome = st.text_input("Nome da testemunha 2", "")
+        testemunha2_cpf = st.text_input("CPF da testemunha 2", "")
 
     st.form_submit_button("Atualizar pré-visualização", width="stretch")
 
@@ -300,13 +311,28 @@ dados = {
     "devedor_endereco": devedor_endereco,
     "valor_total": valor_total,
     "valor_extenso": valor_extenso,
-    "data_leilao": data_leilao.strftime("%d/%m/%Y"),
+    "data_leilao": formatar_data(data_leilao),
     "lotes": lotes,
     "modalidades_pagamento": modalidades_pagamento,
     "valor_parcela": valor_parcela,
-    "garantias": garantias,
-    "outra_garantia": outra_garantia,
     "dias_atraso": dias_atraso,
+    "dias_atraso_extenso": numero_por_extenso(dias_atraso),
+    "cheque_unico_banco": cheque_unico_banco,
+    "cheque_unico_agencia": cheque_unico_agencia,
+    "cheque_unico_conta": cheque_unico_conta,
+    "cheque_unico_numero": cheque_unico_numero,
+    "parcela1_data": formatar_data(parcela1_data),
+    "parcela1_cheque": parcela1_cheque,
+    "parcela1_banco": parcela1_banco,
+    "parcela2_data": formatar_data(parcela2_data),
+    "parcela2_cheque": parcela2_cheque,
+    "parcela2_banco": parcela2_banco,
+    "parcela3_data": formatar_data(parcela3_data),
+    "parcela3_cheque": parcela3_cheque,
+    "parcela3_banco": parcela3_banco,
+    "parcela4_data": formatar_data(parcela4_data),
+    "parcela4_cheque": parcela4_cheque,
+    "parcela4_banco": parcela4_banco,
     "foro": foro,
     "municipio_assinatura": municipio_assinatura,
     "dia_assinatura": data_assinatura.strftime("%d"),

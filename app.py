@@ -221,6 +221,19 @@ def inicializar_estado_formulario() -> None:
         st.session_state.setdefault(chave, valor)
 
 
+def limpar_dados_credor() -> None:
+    st.session_state["credor_nome"] = ""
+    st.session_state["credor_doc"] = ""
+    st.session_state["credor_endereco"] = ""
+
+
+def limpar_dados_devedor() -> None:
+    st.session_state["devedor_nome"] = ""
+    st.session_state["devedor_cpf"] = ""
+    st.session_state["devedor_rg"] = ""
+    st.session_state["devedor_endereco"] = ""
+
+
 inicializar_estado_formulario()
 
 
@@ -365,7 +378,13 @@ with st.form("formulario_contrato"):
             devedor_rg = st.text_input("RG do devedor", key="devedor_rg")
         devedor_endereco = st.text_area("Endereço do devedor", key="devedor_endereco", height=95)
 
-    st.markdown('<div class="bloco-separador"></div>', unsafe_allow_html=True)
+    botoes_col1, botoes_col2, botoes_col3 = st.columns([1, 1, 4])
+    with botoes_col1:
+        limpar_credor = st.form_submit_button("Limpar credor", width="stretch")
+    with botoes_col2:
+        limpar_devedor = st.form_submit_button("Limpar devedor", width="stretch")
+    with botoes_col3:
+        st.markdown('<div class="bloco-separador"></div>', unsafe_allow_html=True)
 
     col_divida, col_pagamento, col_assinatura = st.columns(3)
     with col_divida:
@@ -436,7 +455,15 @@ with st.form("formulario_contrato"):
         testemunha2_nome = st.text_input("Nome da testemunha 2", key="testemunha2_nome")
         testemunha2_cpf = st.text_input("CPF da testemunha 2", key="testemunha2_cpf")
 
-    st.form_submit_button("Atualizar pré-visualização", width="stretch")
+    atualizar_preview = st.form_submit_button("Atualizar pré-visualização", width="stretch")
+
+if limpar_credor:
+    limpar_dados_credor()
+    st.rerun()
+
+if limpar_devedor:
+    limpar_dados_devedor()
+    st.rerun()
 
 dados = {
     "credor_nome": credor_nome,

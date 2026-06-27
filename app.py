@@ -277,9 +277,11 @@ def inicializar_estado_formulario() -> None:
         "devedor_endereco": "",
         "valor_total": "",
         "qtd_parcelas": 4,
+        "qtd_parcelas_cartao": 4,
         "modalidades_pagamento": ["Cheque único para 120 dias"],
         "valor_parcela": "",
         "dias_atraso": 30,
+        "dias_atraso_cartao": 30,
         "foro": "São Francisco do Guaporé - RO",
         "municipio_assinatura": "São Francisco do Guaporé – RO",
         "cheque_unico_banco": "",
@@ -556,6 +558,31 @@ with st.container():
 
         st.markdown('<div class="bloco-separador"></div>', unsafe_allow_html=True)
         st.markdown("### Para Cartao de Credito")
+        col_qtd_parcelas_cartao, col_dias_parcela_cartao, col_valor_parcela_cartao = st.columns(3)
+        with col_qtd_parcelas_cartao:
+            qtd_parcelas_cartao = st.number_input("QTD parcelas (mensais)", min_value=1, step=1, key="qtd_parcelas_cartao")
+        with col_dias_parcela_cartao:
+            dias_atraso_cartao = st.selectbox(
+                "Dias para vencimento de cada parcela",
+                options=OPCOES_DIAS_PARCELA,
+                key="dias_atraso_cartao",
+            )
+        with col_valor_parcela_cartao:
+            valor_parcela_cartao = st.text_input(
+                "Valor da parcela",
+                value=valor_parcela_calculado(valor_total, int(qtd_parcelas_cartao)),
+                disabled=True,
+            )
+
+        st.markdown("### Tabela de vencimentos")
+        tabela_vencimentos_cartao = gerar_tabela_vencimentos(
+            data_inicial=data_leilao,
+            qtd_parcelas=int(qtd_parcelas_cartao),
+            intervalo_dias=int(dias_atraso_cartao),
+            valor_total=valor_total,
+        )
+        st.dataframe(tabela_vencimentos_cartao, hide_index=True, width="stretch")
+
         col_cartao1, col_cartao2, col_cartao3, col_cartao4 = st.columns(4)
         with col_cartao1:
             cartao_credito_banco = st.text_input("Banco", key="cartao_credito_banco")
@@ -615,6 +642,9 @@ dados = {
     "valor_parcela": valor_parcela,
     "dias_atraso": dias_atraso,
     "dias_atraso_extenso": numero_por_extenso(dias_atraso),
+    "qtd_parcelas_cartao": qtd_parcelas_cartao,
+    "valor_parcela_cartao": valor_parcela_cartao,
+    "dias_atraso_cartao": dias_atraso_cartao,
     "cheque_unico_banco": cheque_unico_banco,
     "cheque_unico_agencia": cheque_unico_agencia,
     "cheque_unico_conta": cheque_unico_conta,

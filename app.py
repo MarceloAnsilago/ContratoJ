@@ -156,6 +156,16 @@ def valor_por_extenso(valor: str) -> str:
     return num2words(numero, lang="pt_BR", to="currency")
 
 
+def valor_parcela_calculado(valor_total: str, qtd_parcelas: int) -> str:
+    numero = valor_monetario_para_decimal(valor_total)
+    if numero is None or qtd_parcelas <= 0:
+        return ""
+
+    parcela = (numero / Decimal(qtd_parcelas)).quantize(Decimal("0.01"))
+    texto = f"{parcela:,.2f}"
+    return texto.replace(",", "X").replace(".", ",").replace("X", ".")
+
+
 def numero_por_extenso(numero: int) -> str:
     return num2words(numero, lang="pt_BR")
 
@@ -245,6 +255,7 @@ def inicializar_estado_formulario() -> None:
         "devedor_rg": "",
         "devedor_endereco": "",
         "valor_total": "",
+        "qtd_parcelas": 4,
         "modalidades_pagamento": ["Cheque único para 120 dias"],
         "valor_parcela": "",
         "dias_atraso": 30,
@@ -481,8 +492,16 @@ with st.form("formulario_contrato"):
             OPCOES_MODALIDADES_PAGAMENTO,
             key="modalidades_pagamento",
         )
-        valor_parcela = st.text_input("Valor da parcela", key="valor_parcela")
-        dias_atraso = st.number_input("Dias para vencimento antecipado", min_value=1, key="dias_atraso")
+        col_pagamento_config, col_pagamento_valor = st.columns(2)
+        with col_pagamento_config:
+            qtd_parcelas = st.number_input("QTD parcelas", min_value=1, step=1, key="qtd_parcelas")
+            dias_atraso = st.number_input("Dias para vencimento de cada parcela", min_value=1, step=1, key="dias_atraso")
+        with col_pagamento_valor:
+            valor_parcela = st.text_input(
+                "Valor da parcela",
+                value=valor_parcela_calculado(valor_total, int(qtd_parcelas)),
+                disabled=True,
+            )
 
         st.markdown("### Cheque único para 120 dias")
         col_cheque1, col_cheque2, col_cheque3, col_cheque4 = st.columns(4)
@@ -496,10 +515,10 @@ with st.form("formulario_contrato"):
             cheque_unico_numero = st.text_input("Cheque nº", key="cheque_unico_numero")
 
         st.markdown("### Cheques pré-datados parcelados")
-        parcela1_padrao = data_leilao + timedelta(days=30)
-        parcela2_padrao = data_leilao + timedelta(days=60)
-        parcela3_padrao = data_leilao + timedelta(days=90)
-        parcela4_padrao = data_leilao + timedelta(days=120)
+        parcela1_padrao = data_leilao + timedelta(days=int(dias_atraso))
+        parcela2_padrao = data_leilao + timedelta(days=int(dias_atraso) * 2)
+        parcela3_padrao = data_leilao + timedelta(days=int(dias_atraso) * 3)
+        parcela4_padrao = data_leilao + timedelta(days=int(dias_atraso) * 4)
 
         col_p1, col_p2 = st.columns(2)
         with col_p1:

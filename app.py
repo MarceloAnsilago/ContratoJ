@@ -437,24 +437,25 @@ with st.form("formulario_contrato"):
     st.markdown('<div class="bloco-separador"></div>', unsafe_allow_html=True)
 
     with st.expander("Financeiro", expanded=True):
-        col_divida, col_pagamento = st.columns(2)
+        col_data_leilao, col_divida, col_valor_extenso = st.columns(3)
+        with col_data_leilao:
+            data_leilao = st.date_input("Data do leil?o", value=data_leilao_padrao, format="DD/MM/YYYY")
         with col_divida:
-            st.markdown("### Dívida")
-            valor_total = st.text_input("Valor total", key="valor_total")
+            valor_total = st.text_input("Divida", key="valor_total")
+        with col_valor_extenso:
             valor_extenso = st.text_input("Valor por extenso", valor_por_extenso(valor_total), disabled=True)
-            data_leilao = st.date_input("Data do leilão", value=data_leilao_padrao, format="DD/MM/YYYY")
-            lotes = st.text_input("Número dos lotes", "")
 
-        with col_pagamento:
-            st.markdown("### Pagamento")
-            modalidades_pagamento = st.multiselect(
-                "Modalidade escolhida",
-                ["Cheque único para 120 dias", "Cheques pré-datados parcelados", "Cartão de crédito"],
-                default=st.session_state["modalidades_pagamento"],
-                key="modalidades_pagamento",
-            )
-            valor_parcela = st.text_input("Valor da parcela", key="valor_parcela")
-            dias_atraso = st.number_input("Dias para vencimento antecipado", min_value=1, key="dias_atraso")
+        lotes = st.text_input("N?mero dos lotes", "")
+
+        st.markdown("### Pagamento")
+        modalidades_pagamento = st.multiselect(
+            "Modalidade escolhida",
+            ["Cheque ?nico para 120 dias", "Cheques pr?-datados parcelados", "Cart?o de cr?dito"],
+            default=st.session_state["modalidades_pagamento"],
+            key="modalidades_pagamento",
+        )
+        valor_parcela = st.text_input("Valor da parcela", key="valor_parcela")
+        dias_atraso = st.number_input("Dias para vencimento antecipado", min_value=1, key="dias_atraso")
 
         st.markdown("### Cheque único para 120 dias")
         col_cheque1, col_cheque2, col_cheque3, col_cheque4 = st.columns(4)

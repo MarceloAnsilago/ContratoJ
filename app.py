@@ -168,6 +168,25 @@ def valor_parcela_calculado(valor_total: str, qtd_parcelas: int) -> str:
     return texto.replace(",", "X").replace(".", ",").replace("X", ".")
 
 
+def gerar_tabela_vencimentos(
+    data_inicial: date, qtd_parcelas: int, intervalo_dias: int, valor_total: str
+) -> list[dict[str, str]]:
+    valor_parcela = valor_parcela_calculado(valor_total, qtd_parcelas)
+    vencimentos = []
+
+    for indice in range(1, qtd_parcelas + 1):
+        vencimento = data_inicial + timedelta(days=intervalo_dias * indice)
+        vencimentos.append(
+            {
+                "Parcela": str(indice),
+                "Vencimento": formatar_data(vencimento),
+                "Valor": valor_parcela,
+            }
+        )
+
+    return vencimentos
+
+
 def numero_por_extenso(numero: int) -> str:
     return num2words(numero, lang="pt_BR")
 
@@ -480,7 +499,7 @@ with st.form("formulario_contrato"):
         st.markdown("### Leil\u00e3o e d\u00edvida")
         col_data_leilao, col_divida, col_valor_extenso = st.columns(3)
         with col_data_leilao:
-            data_leilao = st.date_input("Data do leil\u00e3o", value=data_leilao_padrao, format="DD/MM/YYYY")
+            data_leilao = st.date_input("Data inicial", value=data_leilao_padrao, format="DD/MM/YYYY")
         with col_divida:
             valor_total = st.text_input("D\u00edvida", key="valor_total")
         with col_valor_extenso:
@@ -509,6 +528,15 @@ with st.form("formulario_contrato"):
                 value=valor_parcela_calculado(valor_total, int(qtd_parcelas)),
                 disabled=True,
             )
+
+        st.markdown("### Tabela de vencimentos")
+        tabela_vencimentos = gerar_tabela_vencimentos(
+            data_inicial=data_leilao,
+            qtd_parcelas=int(qtd_parcelas),
+            intervalo_dias=int(dias_atraso),
+            valor_total=valor_total,
+        )
+        st.table(tabela_vencimentos)
 
         st.markdown("### Cheque único para 120 dias")
         col_cheque1, col_cheque2, col_cheque3, col_cheque4 = st.columns(4)

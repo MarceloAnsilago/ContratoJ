@@ -96,7 +96,7 @@ def valor_monetario_para_decimal(valor: str) -> Decimal | None:
 def valor_por_extenso(valor: str) -> str:
     numero = valor_monetario_para_decimal(valor)
     if numero is None:
-        return "VALOR POR EXTENSO"
+        return ""
     return num2words(numero, lang="pt_BR", to="currency")
 
 
@@ -129,11 +129,11 @@ CREDOR: {negrito(campo_ou_linha(dados["credor_nome"], "NOME DO VENDEDOR OU LEILO
 
 e, de outro lado:
 
-DEVEDOR: {negrito(campo_ou_linha(dados["devedor_nome"]))}, inscrito(a) no CPF nº {negrito(campo_ou_linha(dados["devedor_cpf"]))}, portador(a) do RG nº {negrito(campo_ou_linha(dados["devedor_rg"]))}, residente e domiciliado(a) à {negrito(campo_ou_linha(dados["devedor_endereco"]))};
+DEVEDOR: {negrito(campo_ou_linha(dados["devedor_nome"], "_____________________________________________________"))}, inscrito(a) no CPF nº {negrito(campo_ou_linha(dados["devedor_cpf"], "________________________"))}, portador(a) do RG nº {negrito(campo_ou_linha(dados["devedor_rg"], "_______________________"))}, residente e domiciliado(a) à {negrito(campo_ou_linha(dados["devedor_endereco"], "_________________________________________________________________________________________________________________________________________________________"))};
 
 As partes acima qualificadas têm entre si justo e contratado o presente instrumento, que se regerá pelas cláusulas e condições seguintes:
 
-CLÁUSULA PRIMEIRA - DA ORIGEM DA DÍVIDA
+CLÁUSULA PRIMEIRA – DA ORIGEM DA DÍVIDA
 
 O DEVEDOR reconhece, confessa e assume ser legítimo devedor da quantia líquida, certa e exigível de R$ {negrito(campo_ou_linha(dados["valor_total"], "___________________"))} ({negrito(campo_ou_linha(dados["valor_extenso"], "_______________________________________________________"))}), decorrente da aquisição de animais bovinos realizada em leilão promovido em {negrito(dados["data_leilao"])}, conforme lote(s) nº {negrito(campo_ou_linha(dados["lotes"], "_______________________________"))}, adquiridos pelo DEVEDOR.
 
@@ -145,7 +145,7 @@ O valor total da dívida confessada é de R$ {negrito(campo_ou_linha(dados["valo
 
 Pagamento mediante a entrega de 01 (um) cheque pré-datado para vencimento em 120 (cento e vinte) dias contados da data da aquisição dos animais.
 
-Dados do Cheque: Banco: {negrito(campo_ou_linha(dados["cheque_unico_banco"], "_______"))} | Agência: {negrito(campo_ou_linha(dados["cheque_unico_agencia"], "___________"))} | Conta: {negrito(campo_ou_linha(dados["cheque_unico_conta"], "____________"))} | Cheque nº: {negrito(campo_ou_linha(dados["cheque_unico_numero"], "______________"))}.
+Dados do Cheque: Banco: {negrito(campo_ou_linha(dados["cheque_unico_banco"], "_______"))} | Agência: {negrito(campo_ou_linha(dados["cheque_unico_agencia"], "___________"))} | Conta: {negrito(campo_ou_linha(dados["cheque_unico_conta"], "____________"))} | Cheque nº:{negrito(campo_ou_linha(dados["cheque_unico_numero"], "______________"))}.
 
 [{opcao2}] Opção 2 - Pagamento por meio de cheques pré-datados parcelados
 
@@ -160,31 +160,31 @@ O valor total será quitado mediante a entrega de 04 (quatro) cheques pré-datad
 
 Parágrafo primeiro. A modalidade de pagamento escolhida pelo DEVEDOR e assinalada acima integrará este contrato para todos os efeitos legais.
 
-CLÁUSULA TERCEIRA - DA MORA E ENCARGOS INDENIZATÓRIOS
+CLÁUSULA TERCEIRA – DA MORA E ENCARGOS INDENIZATÓRIOS
 
 O não pagamento de qualquer parcela ou título nas datas de seus respectivos vencimentos constituirá o DEVEDOR em mora, independentemente de notificação judicial ou extrajudicial, incidindo sobre o valor do débito os seguintes encargos: I - Multa moratória e irredutível de 2% (dois por cento) sobre o valor da parcela em atraso; II - Juros de mora de 1% (um por cento) ao mês, calculados pro rata die (proporcionalmente aos dias de atraso); III - Correção monetária calculada com base na variação positiva do IGP-M/FGV (ou índice oficial que venha a substituí-lo), acumulada desde a data do vencimento até o efetivo pagamento.
 
 Parágrafo Único. Caso o CREDOR precise recorrer a serviços advocatícios ou empresas de cobrança para o recebimento do crédito, o DEVEDOR responderá, além do principal e encargos, pelo pagamento das custas, despesas desembolsadas e honorários advocatícios, estes fixados em 10% (dez por cento) para cobrança extrajudicial e 20% (vinte por cento) em caso de ajuizamento de ação judicial.
 
-CLÁUSULA QUARTA - DO VENCIMENTO ANTECIPADO
+CLÁUSULA QUARTA – DO VENCIMENTO ANTECIPADO
 
 O atraso superior a {negrito(str(dados["dias_atraso"]))} ({negrito(dados["dias_atraso_extenso"])}) dias no pagamento de qualquer das parcelas pactuadas, ou a ocorrência de devolução por falta de fundos de qualquer dos cheques emitidos, acarretará o vencimento antecipado de todas as parcelas vincendas, tornando-se imediatamente exigível o saldo devedor integral, acrescido de todas as penalidades previstas na Cláusula Terceira, independentemente de prévia notificação ou aviso.
 
-CLÁUSULA QUINTA - DA CONFISSÃO IRREVOGÁVEL E TÍTULO EXECUTIVO
+CLÁUSULA QUINTA– DA CONFISSÃO IRREVOGÁVEL E TÍTULO EXECUTIVO
 
 O DEVEDOR declara reconhecer expressamente a existência, legitimidade, certeza, liquidez e exigibilidade da dívida descrita neste instrumento. Este contrato é firmado em caráter irrevogável e irretratável, constituindo-se em Título Executivo Extrajudicial, nos termos do Artigo 784, inciso III, do Código de Processo Civil brasileiro, apto a embasar Ação de Execução imediata.
 
-CLÁUSULA SEXTA - DAS ASSINATURAS ELETRÔNICAS
+CLÁUSULA SEXTA – DAS ASSINATURAS ELETRÔNICAS
 
 As partes declaram e concordam que este contrato poderá ser assinado eletronicamente por meio de plataformas de assinatura digital, sendo as assinaturas consideradas válidas, íntegras e plenamente eficazes para todos os fins de direito, nos termos da Medida Provisória nº 2.200-2/2001 e da Lei nº 14.063/2020.
 
-CLÁUSULA SÉTIMA - DO FORO
+CLÁUSULA SÉTIMA – DO FORO
 
 Fica eleito o foro da Comarca de {negrito(campo_ou_linha(dados["foro"], "São Francisco do Guaporé - RO"))}, com renúncia expressa a qualquer outro, por mais privilegiado que seja, para dirimir eventuais controvérsias decorrentes deste contrato.
 
 E, por estarem assim justos e contratados, firmam o presente instrumento em 02 (duas) vias de igual teor e forma, na presença de 02 (duas) testemunhas abaixo assinadas.
 
-{negrito(campo_ou_linha(dados["municipio_assinatura"], "São Francisco do Guaporé - RO"))}, {negrito(dados["dia_assinatura"])} de {negrito(dados["mes_assinatura"])} de {negrito(dados["ano_assinatura"])}.
+{negrito(campo_ou_linha(dados["municipio_assinatura"], "São Francisco do Guaporé – RO"))}, {negrito(dados["dia_assinatura"])} de {negrito(dados["mes_assinatura"])} de {negrito(dados["ano_assinatura"])}.
 
 
 ______________________________________________
@@ -252,7 +252,7 @@ with st.form("formulario_contrato"):
     with col_assinatura:
         st.markdown("### Foro e assinatura")
         foro = st.text_input("Comarca/UF", "São Francisco do Guaporé - RO")
-        municipio_assinatura = st.text_input("Município da assinatura", "São Francisco do Guaporé - RO")
+        municipio_assinatura = st.text_input("Município da assinatura", "São Francisco do Guaporé – RO")
         data_assinatura = st.date_input("Data da assinatura", value=date.today(), format="DD/MM/YYYY")
 
     st.markdown("### Cheque único para 120 dias")

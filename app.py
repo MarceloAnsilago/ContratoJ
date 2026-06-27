@@ -69,11 +69,15 @@ st.markdown(
         border-radius: 6px;
     }
     .bloco-separador {
-        height: 3px;
-        margin: 0.9rem -1.25rem 1rem;
+        height: 1px;
+        margin: 0.75rem 0 1rem;
         border: 0;
-        background: linear-gradient(90deg, #d8e4dc 0%, #8fae9c 20%, #6f8f80 50%, #8fae9c 80%, #d8e4dc 100%);
-        box-shadow: 0 1px 0 rgba(59, 82, 69, 0.08);
+        background: #d8dee9;
+    }
+    .botao-credor-wrap {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
     }
     </style>
     """,
@@ -378,13 +382,17 @@ with st.form("formulario_contrato"):
             devedor_rg = st.text_input("RG do devedor", key="devedor_rg")
         devedor_endereco = st.text_area("Endereço do devedor", key="devedor_endereco", height=95)
 
-    botoes_col1, botoes_col2, botoes_col3 = st.columns([4, 1, 1])
+    botoes_col1, botoes_col2, botoes_col3 = st.columns([1, 1, 1])
     with botoes_col1:
-        st.markdown('<div class="bloco-separador"></div>', unsafe_allow_html=True)
-    with botoes_col2:
+        st.markdown('<div class="botao-credor-wrap">', unsafe_allow_html=True)
         limpar_credor = st.form_submit_button("Limpar credor", width="stretch")
+        st.markdown("</div>", unsafe_allow_html=True)
+    with botoes_col2:
+        st.write("")
     with botoes_col3:
         limpar_devedor = st.form_submit_button("Limpar devedor", width="stretch")
+
+    st.markdown('<div class="bloco-separador"></div>', unsafe_allow_html=True)
 
     col_divida, col_pagamento, col_assinatura = st.columns(3)
     with col_divida:

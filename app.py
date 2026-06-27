@@ -286,6 +286,10 @@ def inicializar_estado_formulario() -> None:
         "cheque_unico_agencia": "",
         "cheque_unico_conta": "",
         "cheque_unico_numero": "",
+        "cartao_credito_banco": "",
+        "cartao_credito_agencia": "",
+        "cartao_credito_conta": "",
+        "cartao_credito_numero": "",
         "parcela1_cheque": "",
         "parcela1_banco": "",
         "parcela2_cheque": "",
@@ -550,6 +554,18 @@ with st.container():
         with col_cheque4:
             cheque_unico_numero = st.text_input("Cheque nº", key="cheque_unico_numero")
 
+        st.markdown('<div class="bloco-separador"></div>', unsafe_allow_html=True)
+        st.markdown("### Para Cartao de Credito")
+        col_cartao1, col_cartao2, col_cartao3, col_cartao4 = st.columns(4)
+        with col_cartao1:
+            cartao_credito_banco = st.text_input("Banco", key="cartao_credito_banco")
+        with col_cartao2:
+            cartao_credito_agencia = st.text_input("Agencia", key="cartao_credito_agencia")
+        with col_cartao3:
+            cartao_credito_conta = st.text_input("Conta", key="cartao_credito_conta")
+        with col_cartao4:
+            cartao_credito_numero = st.text_input("Numero", key="cartao_credito_numero")
+
     with st.expander("Informacoes finais", expanded=True):
         st.markdown("### Foro e assinatura")
         foro = st.text_input("Comarca/UF", key="foro")
@@ -603,6 +619,10 @@ dados = {
     "cheque_unico_agencia": cheque_unico_agencia,
     "cheque_unico_conta": cheque_unico_conta,
     "cheque_unico_numero": cheque_unico_numero,
+    "cartao_credito_banco": cartao_credito_banco,
+    "cartao_credito_agencia": cartao_credito_agencia,
+    "cartao_credito_conta": cartao_credito_conta,
+    "cartao_credito_numero": cartao_credito_numero,
     "parcela1_data": formatar_data(parcela1_data),
     "parcela1_cheque": parcela1_cheque,
     "parcela1_banco": parcela1_banco,

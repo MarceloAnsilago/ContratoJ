@@ -513,6 +513,7 @@ with st.container():
             OPCOES_MODALIDADES_PAGAMENTO,
             key="modalidades_pagamento",
         )
+        st.markdown("### Para cheque")
         col_qtd_parcelas, col_dias_parcela, col_valor_parcela = st.columns(3)
         with col_qtd_parcelas:
             qtd_parcelas = st.number_input("QTD parcelas (mensais)", min_value=1, step=1, key="qtd_parcelas")

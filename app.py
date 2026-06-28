@@ -195,14 +195,56 @@ def decimal_para_texto_monetario(valor: Decimal) -> str:
     return texto.replace(",", "X").replace(".", ",").replace("X", ".")
 
 
+def sincronizar_valores_pagamento() -> None:
+    valor_total = str(st.session_state.get("valor_total", "")).strip()
+    entrada = str(st.session_state.get("entrada", "")).strip() or "0"
+    st.session_state["valor_total"] = valor_total
+    st.session_state["entrada"] = entrada
+
+    valor_remanescente = valor_remanescente_calculado(valor_total, entrada)
+    st.session_state["valor_atual_exibicao"] = valor_remanescente
+    st.session_state["valor_remanescente_extenso_exibicao"] = valor_por_extenso(valor_remanescente)
+
+    modalidades = st.session_state.get("modalidades_pagamento", [])
+    if not isinstance(modalidades, list):
+        modalidades = [modalidades] if modalidades else []
+
+    remanescente_decimal = valor_monetario_para_decimal(valor_remanescente) or Decimal("0")
+    valor_cheque_divisao = str(st.session_state.get("valor_cheque_divisao", "")).strip()
+
+    if "Cheque bancario" in modalidades and "Cartao de credito" in modalidades:
+        valor_cheque_decimal = valor_monetario_para_decimal(valor_cheque_divisao)
+        if valor_cheque_decimal is None:
+            st.session_state["valor_cartao_divisao_exibicao"] = decimal_para_texto_monetario(remanescente_decimal)
+            return
+
+        if valor_cheque_decimal < 0:
+            valor_cheque_decimal = Decimal("0")
+            st.session_state["valor_cheque_divisao"] = "0"
+
+        if valor_cheque_decimal > remanescente_decimal:
+            valor_cheque_decimal = remanescente_decimal
+            st.session_state["valor_cheque_divisao"] = decimal_para_texto_monetario(valor_cheque_decimal)
+
+        st.session_state["valor_cartao_divisao_exibicao"] = decimal_para_texto_monetario(
+            remanescente_decimal - valor_cheque_decimal
+        )
+    else:
+        st.session_state["valor_cartao_divisao_exibicao"] = decimal_para_texto_monetario(remanescente_decimal)
+
+
+def atualizar_valor_total() -> None:
+    sincronizar_valores_pagamento()
+
+
 def atualizar_entrada() -> None:
-    entrada = str(st.session_state.get("entrada", "")).strip()
-    st.session_state["entrada"] = entrada or "0"
+    sincronizar_valores_pagamento()
 
 
 def atualizar_valor_cheque_divisao() -> None:
     valor = str(st.session_state.get("valor_cheque_divisao", "")).strip()
     st.session_state["valor_cheque_divisao"] = valor
+    sincronizar_valores_pagamento()
 
 
 def atualizar_modalidades_pagamento() -> None:
@@ -211,6 +253,7 @@ def atualizar_modalidades_pagamento() -> None:
         modalidades = [modalidades] if modalidades else []
     if "Cheque bancario" not in modalidades or "Cartao de credito" not in modalidades:
         st.session_state["valor_cheque_divisao"] = ""
+    sincronizar_valores_pagamento()
 
 
 def gerar_tabela_vencimentos(
@@ -598,7 +641,8 @@ with st.container():
         with col_data_leilao:
             data_leilao = st.date_input("Data inicial", value=data_leilao_padrao, format="DD/MM/YYYY")
         with col_divida:
-            valor_total = st.text_input("D\u00edvida", key="valor_total")
+            st.text_input("D\u00edvida", key="valor_total", on_change=atualizar_valor_total)
+            valor_total = st.session_state.get("valor_total", "")
         with col_valor_extenso:
             valor_extenso = st.text_input("Valor por extenso", valor_por_extenso(valor_total), disabled=True)
 
@@ -613,10 +657,10 @@ with st.container():
         )
         col_entrada, col_valor_atual, col_valor_remanescente_extenso = st.columns(3)
         with col_entrada:
-            entrada = st.text_input("Com entrada? Informe o valor:", key="entrada", on_change=atualizar_entrada)
-        valor_remanescente = valor_remanescente_calculado(valor_total, entrada)
-        st.session_state["valor_atual_exibicao"] = valor_remanescente
-        st.session_state["valor_remanescente_extenso_exibicao"] = valor_por_extenso(valor_remanescente)
+            st.text_input("Com entrada? Informe o valor:", key="entrada", on_change=atualizar_entrada)
+            entrada = st.session_state.get("entrada", "0")
+        sincronizar_valores_pagamento()
+        valor_remanescente = st.session_state.get("valor_atual_exibicao", "")
         with col_valor_atual:
             st.text_input("Valor atual", disabled=True, key="valor_atual_exibicao")
         with col_valor_remanescente_extenso:
@@ -650,7 +694,6 @@ with st.container():
 
             valor_cheque_base = decimal_para_texto_monetario(valor_cheque_decimal)
             valor_cartao_base = decimal_para_texto_monetario(remanescente_decimal - valor_cheque_decimal)
-            st.session_state["valor_cartao_divisao_exibicao"] = valor_cartao_base
             with col_valor_cartao:
                 st.text_input("Valor para cartao", disabled=True, key="valor_cartao_divisao_exibicao")
             if not valor_divisao_informado:

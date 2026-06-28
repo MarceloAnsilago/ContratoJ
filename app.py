@@ -414,7 +414,6 @@ def inicializar_estado_formulario() -> None:
         "cartao_credito_banco": "",
         "cartao_credito_agencia": "",
         "cartao_credito_conta": "",
-        "cartao_credito_numero": "",
         "testemunha1_nome": "",
         "testemunha1_cpf": "",
         "testemunha2_nome": "",
@@ -520,7 +519,7 @@ Valor destinado ao cartão: R$ {negrito(campo_ou_linha(dados["valor_cartao_base"
 Cronograma de vencimentos do cartão:
 {montar_cronograma_contrato(dados["tabela_vencimentos_cartao"])}
 
-Dados do cartão: Banco: {negrito(campo_ou_linha(dados["cartao_credito_banco"], "_______"))} | Agência: {negrito(campo_ou_linha(dados["cartao_credito_agencia"], "___________"))} | Conta: {negrito(campo_ou_linha(dados["cartao_credito_conta"], "____________"))} | Número: {negrito(campo_ou_linha(dados["cartao_credito_numero"], "______________"))}.
+Dados do cartão: Banco: {negrito(campo_ou_linha(dados["cartao_credito_banco"], "_______"))} | Agência: {negrito(campo_ou_linha(dados["cartao_credito_agencia"], "___________"))} | Conta: {negrito(campo_ou_linha(dados["cartao_credito_conta"], "____________"))}.
 """
 
     assinatura_credor = assinatura_rotulada("Credor", dados["credor_nome"], "NOME DO CREDOR")
@@ -649,7 +648,6 @@ with st.container():
                 exibir_warning_campo_numerico(devedor_cpf, "CPF do devedor")
             with devedor_rg_col:
                 devedor_rg = st.text_input("RG do devedor", key="devedor_rg")
-                exibir_warning_campo_numerico(devedor_rg, "RG do devedor")
             devedor_endereco = st.text_area("Endereço do devedor", key="devedor_endereco", height=95)
 
         botoes_col1, botoes_col2, botoes_col3 = st.columns([1, 1, 1])
@@ -824,7 +822,7 @@ with st.container():
             st.dataframe(tabela_vencimentos_cartao, hide_index=True, width="stretch")
             st.caption(f"Soma das parcelas: {somar_valores_tabela(tabela_vencimentos_cartao)}")
 
-            col_cartao1, col_cartao2, col_cartao3, col_cartao4 = st.columns(4)
+            col_cartao1, col_cartao2, col_cartao3 = st.columns(3)
             with col_cartao1:
                 cartao_credito_banco = st.text_input("Banco", key="cartao_credito_banco")
             with col_cartao2:
@@ -833,13 +831,6 @@ with st.container():
             with col_cartao3:
                 cartao_credito_conta = st.text_input("Conta", key="cartao_credito_conta")
                 exibir_warning_campo_numerico(cartao_credito_conta, "Conta")
-            with col_cartao4:
-                cartao_credito_numero = st.text_input(
-                    "Número",
-                    key="cartao_credito_numero",
-                    placeholder="0000 0000 0000 0000 12/30",
-                )
-                exibir_warning_campo_numerico(cartao_credito_numero, "Número")
         else:
             qtd_parcelas_cartao = st.session_state.get("qtd_parcelas_cartao", 4)
             dias_atraso_cartao = st.session_state.get("dias_atraso_cartao", 30)
@@ -847,7 +838,6 @@ with st.container():
             cartao_credito_banco = st.session_state.get("cartao_credito_banco", "")
             cartao_credito_agencia = st.session_state.get("cartao_credito_agencia", "")
             cartao_credito_conta = st.session_state.get("cartao_credito_conta", "")
-            cartao_credito_numero = st.session_state.get("cartao_credito_numero", "")
 
     with st.expander("Informações finais", expanded=False):
         st.markdown("### Foro e assinatura")
@@ -916,7 +906,6 @@ dados = {
     "cartao_credito_banco": cartao_credito_banco,
     "cartao_credito_agencia": cartao_credito_agencia,
     "cartao_credito_conta": cartao_credito_conta,
-    "cartao_credito_numero": cartao_credito_numero,
     "parcela1_data": formatar_data(parcela1_data),
     "parcela1_banco": parcela1_banco,
     "parcela2_data": formatar_data(parcela2_data),

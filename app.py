@@ -184,9 +184,20 @@ def valor_remanescente_calculado(valor_total: str, entrada: str) -> str:
     return texto.replace(",", "X").replace(".", ",").replace("X", ".")
 
 
+def decimal_para_texto_monetario(valor: Decimal) -> str:
+    valor = valor.quantize(Decimal("0.01"))
+    texto = f"{valor:,.2f}"
+    return texto.replace(",", "X").replace(".", ",").replace("X", ".")
+
+
 def atualizar_entrada() -> None:
     entrada = str(st.session_state.get("entrada", "")).strip()
     st.session_state["entrada"] = entrada or "0"
+
+
+def atualizar_valor_cheque_divisao() -> None:
+    valor = str(st.session_state.get("valor_cheque_divisao", "")).strip()
+    st.session_state["valor_cheque_divisao"] = valor or "0"
 
 
 def gerar_tabela_vencimentos(
@@ -300,6 +311,7 @@ def inicializar_estado_formulario() -> None:
         "qtd_parcelas": 4,
         "qtd_parcelas_cartao": 4,
         "entrada": "0",
+        "valor_cheque_divisao": "0",
         "modalidades_pagamento": ["Cheque único para 120 dias"],
         "valor_parcela": "",
         "dias_atraso": 30,
@@ -556,6 +568,30 @@ with st.container():
             for modalidade in OPCOES_MODALIDADES_PAGAMENTO[:2]
         )
         mostrar_formulario_cartao = OPCOES_MODALIDADES_PAGAMENTO[2] in modalidades_pagamento
+        valor_cheque_base = valor_remanescente
+        valor_cartao_base = valor_remanescente
+
+        if mostrar_formulario_cheque and mostrar_formulario_cartao:
+            col_valor_cheque, col_valor_cartao = st.columns(2)
+            with col_valor_cheque:
+                valor_cheque_divisao = st.text_input(
+                    "Do valor remanescente, quanto sera pago com cheque?",
+                    key="valor_cheque_divisao",
+                    on_change=atualizar_valor_cheque_divisao,
+                )
+
+            remanescente_decimal = valor_monetario_para_decimal(valor_remanescente) or Decimal("0")
+            valor_cheque_decimal = valor_monetario_para_decimal(valor_cheque_divisao) or Decimal("0")
+            if valor_cheque_decimal < 0:
+                valor_cheque_decimal = Decimal("0")
+            if valor_cheque_decimal > remanescente_decimal:
+                valor_cheque_decimal = remanescente_decimal
+
+            valor_cheque_base = decimal_para_texto_monetario(valor_cheque_decimal)
+            valor_cartao_base = decimal_para_texto_monetario(remanescente_decimal - valor_cheque_decimal)
+            st.session_state["valor_cartao_divisao_exibicao"] = valor_cartao_base
+            with col_valor_cartao:
+                st.text_input("Valor para cartao", disabled=True, key="valor_cartao_divisao_exibicao")
 
         if mostrar_formulario_cheque:
             st.markdown("### Para cheque")
@@ -568,14 +604,14 @@ with st.container():
                     options=OPCOES_DIAS_PARCELA,
                     key="dias_atraso",
                 )
-            valor_parcela = valor_parcela_calculado(valor_remanescente, int(qtd_parcelas))
+            valor_parcela = valor_parcela_calculado(valor_cheque_base, int(qtd_parcelas))
 
             st.markdown("### Tabela de vencimentos")
             tabela_vencimentos = gerar_tabela_vencimentos(
                 data_inicial=data_leilao,
                 qtd_parcelas=int(qtd_parcelas),
                 intervalo_dias=int(dias_atraso),
-                valor_total=valor_remanescente,
+                valor_total=valor_cheque_base,
             )
             st.dataframe(tabela_vencimentos, hide_index=True, width="stretch")
 
@@ -592,7 +628,7 @@ with st.container():
         else:
             qtd_parcelas = st.session_state.get("qtd_parcelas", 4)
             dias_atraso = st.session_state.get("dias_atraso", 30)
-            valor_parcela = valor_parcela_calculado(valor_remanescente, int(qtd_parcelas))
+            valor_parcela = valor_parcela_calculado(valor_cheque_base, int(qtd_parcelas))
             cheque_unico_banco = st.session_state.get("cheque_unico_banco", "")
             cheque_unico_agencia = st.session_state.get("cheque_unico_agencia", "")
             cheque_unico_conta = st.session_state.get("cheque_unico_conta", "")
@@ -612,14 +648,14 @@ with st.container():
                     options=OPCOES_DIAS_PARCELA,
                     key="dias_atraso_cartao",
                 )
-            valor_parcela_cartao = valor_parcela_calculado(valor_remanescente, int(qtd_parcelas_cartao))
+            valor_parcela_cartao = valor_parcela_calculado(valor_cartao_base, int(qtd_parcelas_cartao))
 
             st.markdown("### Tabela de vencimentos")
             tabela_vencimentos_cartao = gerar_tabela_vencimentos(
                 data_inicial=data_leilao,
                 qtd_parcelas=int(qtd_parcelas_cartao),
                 intervalo_dias=int(dias_atraso_cartao),
-                valor_total=valor_remanescente,
+                valor_total=valor_cartao_base,
             )
             st.dataframe(tabela_vencimentos_cartao, hide_index=True, width="stretch")
 
@@ -635,7 +671,7 @@ with st.container():
         else:
             qtd_parcelas_cartao = st.session_state.get("qtd_parcelas_cartao", 4)
             dias_atraso_cartao = st.session_state.get("dias_atraso_cartao", 30)
-            valor_parcela_cartao = valor_parcela_calculado(valor_remanescente, int(qtd_parcelas_cartao))
+            valor_parcela_cartao = valor_parcela_calculado(valor_cartao_base, int(qtd_parcelas_cartao))
             cartao_credito_banco = st.session_state.get("cartao_credito_banco", "")
             cartao_credito_agencia = st.session_state.get("cartao_credito_agencia", "")
             cartao_credito_conta = st.session_state.get("cartao_credito_conta", "")
@@ -685,6 +721,9 @@ dados = {
     "valor_total": valor_total,
     "entrada": entrada,
     "valor_remanescente": valor_remanescente,
+    "valor_cheque_divisao": st.session_state.get("valor_cheque_divisao", "0"),
+    "valor_cheque_base": valor_cheque_base,
+    "valor_cartao_base": valor_cartao_base,
     "valor_extenso": valor_extenso,
     "data_leilao": formatar_data(data_leilao),
     "lotes": lotes,

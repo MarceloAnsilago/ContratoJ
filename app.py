@@ -1,4 +1,5 @@
 import re
+import textwrap
 from datetime import date, timedelta
 from decimal import Decimal, InvalidOperation
 from io import BytesIO
@@ -458,6 +459,14 @@ def texto_padrao(dados: dict) -> str:
     def negrito(valor: str) -> str:
         return f"[[B]]{valor}[[/B]]"
 
+    def assinatura_rotulada(rotulo: str, nome: str, padrao: str) -> str:
+        conteudo = nome.strip() or padrao
+        return textwrap.fill(
+            f"{rotulo} - {conteudo}",
+            width=58,
+            subsequent_indent=" " * (len(rotulo) + 3),
+        )
+
     def valor_documento(valor: str, padrao: str = "0,00") -> str:
         numero = valor_monetario_para_decimal(valor)
         if numero is None:
@@ -490,30 +499,33 @@ def texto_padrao(dados: dict) -> str:
     bloco_cheque = ""
     if "Cheque bancario" in modalidades_pagamento:
         bloco_cheque = f"""
-[{opcao1}] Opcao 1 - Cheque bancario:
+[{opcao1}] Opção 1 - Cheque bancário:
 
 Valor destinado ao cheque: R$ {negrito(campo_ou_linha(dados["valor_cheque_base"], "0,00"))} ({negrito(campo_ou_linha(valor_por_extenso(dados["valor_cheque_base"]), "zero reais"))}).
 
 Cronograma de vencimentos do cheque:
 {montar_cronograma_contrato(dados["tabela_vencimentos_cheque"])}
 
-Dados do cheque: Banco: {negrito(campo_ou_linha(dados["cheque_unico_banco"], "_______"))} | Agencia: {negrito(campo_ou_linha(dados["cheque_unico_agencia"], "___________"))} | Conta: {negrito(campo_ou_linha(dados["cheque_unico_conta"], "____________"))} | Cheque(s) n°: {negrito(campo_ou_linha(dados["cheque_unico_numero"], "000185-000186-000187"))}.
+Dados do cheque: Banco: {negrito(campo_ou_linha(dados["cheque_unico_banco"], "_______"))} | Agência: {negrito(campo_ou_linha(dados["cheque_unico_agencia"], "___________"))} | Conta: {negrito(campo_ou_linha(dados["cheque_unico_conta"], "____________"))} | Cheque(s) nº: {negrito(campo_ou_linha(dados["cheque_unico_numero"], "000185-000186-000187"))}.
 """
 
     bloco_cartao = ""
     if "Cartao de credito" in modalidades_pagamento:
         bloco_cartao = f"""
-[{opcao2}] Opcao 2 - Cartao de credito:
+[{opcao2}] Opção 2 - Cartão de crédito:
 
-Valor destinado ao cartao: R$ {negrito(campo_ou_linha(dados["valor_cartao_base"], "0,00"))} ({negrito(campo_ou_linha(valor_por_extenso(dados["valor_cartao_base"]), "zero reais"))}).
+Valor destinado ao cartão: R$ {negrito(campo_ou_linha(dados["valor_cartao_base"], "0,00"))} ({negrito(campo_ou_linha(valor_por_extenso(dados["valor_cartao_base"]), "zero reais"))}).
 
-Cronograma de vencimentos do cartao:
+Cronograma de vencimentos do cartão:
 {montar_cronograma_contrato(dados["tabela_vencimentos_cartao"])}
 
-Dados do cartao: Banco: {negrito(campo_ou_linha(dados["cartao_credito_banco"], "_______"))} | Agencia: {negrito(campo_ou_linha(dados["cartao_credito_agencia"], "___________"))} | Conta: {negrito(campo_ou_linha(dados["cartao_credito_conta"], "____________"))} | Numero: {negrito(campo_ou_linha(dados["cartao_credito_numero"], "______________"))}.
+Dados do cartão: Banco: {negrito(campo_ou_linha(dados["cartao_credito_banco"], "_______"))} | Agência: {negrito(campo_ou_linha(dados["cartao_credito_agencia"], "___________"))} | Conta: {negrito(campo_ou_linha(dados["cartao_credito_conta"], "____________"))} | Número: {negrito(campo_ou_linha(dados["cartao_credito_numero"], "______________"))}.
 """
 
-    return f"""CONTRATO DE CONFISSAO DE DIVIDA
+    assinatura_credor = assinatura_rotulada("Credor", dados["credor_nome"], "NOME DO CREDOR")
+    assinatura_devedor = assinatura_rotulada("Devedor", dados["devedor_nome"], "NOME DO DEVEDOR")
+
+    return f"""CONTRATO DE CONFISSÃO DE DÍVIDA
 
 Pelo presente instrumento particular, de um lado:
 
@@ -523,52 +535,52 @@ e, de outro lado:
 
 DEVEDOR: {negrito(campo_ou_linha(dados["devedor_nome"], "_____________________________________________________"))}, inscrito(a) no CPF n {negrito(campo_ou_linha(dados["devedor_cpf"], "________________________"))}, portador(a) do RG n {negrito(campo_ou_linha(dados["devedor_rg"], "_______________________"))}, residente e domiciliado(a) a {negrito(campo_ou_linha(dados["devedor_endereco"], "_________________________________________________________________________________________________________________________________________________________"))};
 
-As partes acima qualificadas tem entre si justo e contratado o presente instrumento, que se regera pelas clausulas e condicoes seguintes:
+As partes acima qualificadas têm entre si justo e contratado o presente instrumento, que se regerá pelas cláusulas e condições seguintes:
 
-CLAUSULA PRIMEIRA - DA ORIGEM DA DIVIDA
+CLÁUSULA PRIMEIRA - DA ORIGEM DA DÍVIDA
 
-O DEVEDOR reconhece que a aquisicao objeto deste instrumento totalizou originalmente R$ {negrito(campo_ou_linha(valor_documento(dados["valor_total"], "___________________"), "___________________"))} ({negrito(campo_ou_linha(dados["valor_extenso"], "_______________________________________________________"))}), decorrente da aquisicao de animais bovinos realizada em leilao promovido em {negrito(dados["data_leilao"])}, conforme lote(s) n {negrito(campo_ou_linha(dados["lotes"], "_______________________________"))}, adquiridos pelo DEVEDOR. {resumo_entrada}Assim, o DEVEDOR confessa e assume como saldo devedor atual a quantia liquida, certa e exigivel de R$ {negrito(campo_ou_linha(dados["valor_remanescente"], "0,00"))} ({negrito(campo_ou_linha(valor_por_extenso(dados["valor_remanescente"]), "zero reais"))}), a ser paga da seguinte forma: {resumo_modalidades}.
+O DEVEDOR reconhece que a aquisição objeto deste instrumento totalizou originalmente R$ {negrito(campo_ou_linha(valor_documento(dados["valor_total"], "___________________"), "___________________"))} ({negrito(campo_ou_linha(dados["valor_extenso"], "_______________________________________________________"))}), decorrente da aquisição de animais bovinos realizada em leilão promovido em {negrito(dados["data_leilao"])}, conforme lote(s) n {negrito(campo_ou_linha(dados["lotes"], "_______________________________"))}, adquiridos pelo DEVEDOR. {resumo_entrada}Assim, o DEVEDOR confessa e assume como saldo devedor atual a quantia líquida, certa e exigível de R$ {negrito(campo_ou_linha(dados["valor_remanescente"], "0,00"))} ({negrito(campo_ou_linha(valor_por_extenso(dados["valor_remanescente"]), "zero reais"))}), a ser paga da seguinte forma: {resumo_modalidades}.
 
-CLAUSULA SEGUNDA - DO VALOR E FORMA DE PAGAMENTO
+CLÁUSULA SEGUNDA - DO VALOR E FORMA DE PAGAMENTO
 
-O valor total da divida confessada e de R$ {negrito(campo_ou_linha(dados["valor_remanescente"], "__________________"))} ({negrito(campo_ou_linha(valor_por_extenso(dados["valor_remanescente"]), "________________________________________________________"))}), cujo pagamento sera realizado por uma das modalidades abaixo, expressamente escolhida e assinalada pelo DEVEDOR no ato da assinatura deste instrumento:
+O valor total da dívida confessada é de R$ {negrito(campo_ou_linha(dados["valor_remanescente"], "__________________"))} ({negrito(campo_ou_linha(valor_por_extenso(dados["valor_remanescente"]), "________________________________________________________"))}), cujo pagamento será realizado por uma das modalidades abaixo, expressamente escolhida e assinalada pelo DEVEDOR no ato da assinatura deste instrumento:
 {bloco_cheque}
 {bloco_cartao}
-Paragrafo primeiro. A modalidade de pagamento escolhida pelo DEVEDOR e assinalada acima integrara este contrato para todos os efeitos legais.
+Parágrafo primeiro. A modalidade de pagamento escolhida pelo DEVEDOR e assinalada acima integrará este contrato para todos os efeitos legais.
 
-CLAUSULA TERCEIRA - DA MORA E ENCARGOS INDENIZATORIOS
+CLÁUSULA TERCEIRA - DA MORA E ENCARGOS INDENIZATÓRIOS
 
-O nao pagamento de qualquer parcela ou titulo nas datas de seus respectivos vencimentos constituira o DEVEDOR em mora, independentemente de notificacao judicial ou extrajudicial, incidindo sobre o valor do debito os seguintes encargos: I - Multa moratoria e irredutivel de 2% (dois por cento) sobre o valor da parcela em atraso; II - Juros de mora de 1% (um por cento) ao mes, calculados pro rata die (proporcionalmente aos dias de atraso); III - Correcao monetaria calculada com base na variacao positiva do IGP-M/FGV (ou indice oficial que venha a substitui-lo), acumulada desde a data do vencimento ate o efetivo pagamento.
+O não pagamento de qualquer parcela ou título nas datas de seus respectivos vencimentos constituirá o DEVEDOR em mora, independentemente de notificação judicial ou extrajudicial, incidindo sobre o valor do débito os seguintes encargos: I - Multa moratória e irredutível de 2% (dois por cento) sobre o valor da parcela em atraso; II - Juros de mora de 1% (um por cento) ao mês, calculados pro rata die (proporcionalmente aos dias de atraso); III - Correção monetária calculada com base na variação positiva do IGP-M/FGV (ou índice oficial que venha a substituí-lo), acumulada desde a data do vencimento até o efetivo pagamento.
 
-Paragrafo Unico. Caso o CREDOR precise recorrer a servicos advocaticios ou empresas de cobranca para o recebimento do credito, o DEVEDOR respondera, alem do principal e encargos, pelo pagamento das custas, despesas desembolsadas e honorarios advocaticios, estes fixados em 10% (dez por cento) para cobranca extrajudicial e 20% (vinte por cento) em caso de ajuizamento de acao judicial.
+Parágrafo único. Caso o CREDOR precise recorrer a serviços advocatícios ou empresas de cobrança para o recebimento do crédito, o DEVEDOR responderá, além do principal e encargos, pelo pagamento das custas, despesas desembolsadas e honorários advocatícios, estes fixados em 10% (dez por cento) para cobrança extrajudicial e 20% (vinte por cento) em caso de ajuizamento de ação judicial.
 
-CLAUSULA QUARTA - DO VENCIMENTO ANTECIPADO
+CLÁUSULA QUARTA - DO VENCIMENTO ANTECIPADO
 
-O atraso superior a {negrito(str(dados["dias_atraso"]))} ({negrito(dados["dias_atraso_extenso"])}) dias no pagamento de qualquer das parcelas pactuadas, ou a ocorrencia de devolucao por falta de fundos de qualquer dos cheques emitidos, acarretara o vencimento antecipado de todas as parcelas vincendas, tornando-se imediatamente exigivel o saldo devedor integral, acrescido de todas as penalidades previstas na Clausula Terceira, independentemente de previa notificacao ou aviso.
+O atraso superior a {negrito(str(dados["dias_atraso"]))} ({negrito(dados["dias_atraso_extenso"])}) dias no pagamento de qualquer das parcelas pactuadas, ou a ocorrência de devolução por falta de fundos de qualquer dos cheques emitidos, acarretará o vencimento antecipado de todas as parcelas vincendas, tornando-se imediatamente exigível o saldo devedor integral, acrescido de todas as penalidades previstas na Cláusula Terceira, independentemente de prévia notificação ou aviso.
 
-CLAUSULA QUINTA - DA CONFISSAO IRREVOGAVEL E TITULO EXECUTIVO
+CLÁUSULA QUINTA - DA CONFISSÃO IRREVOGÁVEL E TÍTULO EXECUTIVO
 
-O DEVEDOR declara reconhecer expressamente a existencia, legitimidade, certeza, liquidez e exigibilidade da divida descrita neste instrumento. Este contrato e firmado em carater irrevogavel e irretratavel, constituindo-se em Titulo Executivo Extrajudicial, nos termos do Artigo 784, inciso III, do Codigo de Processo Civil brasileiro, apto a embasar Acao de Execucao imediata.
+O DEVEDOR declara reconhecer expressamente a existência, legitimidade, certeza, liquidez e exigibilidade da dívida descrita neste instrumento. Este contrato é firmado em caráter irrevogável e irretratável, constituindo-se em Título Executivo Extrajudicial, nos termos do Artigo 784, inciso III, do Código de Processo Civil brasileiro, apto a embasar Ação de Execução imediata.
 
-CLAUSULA SEXTA - DAS ASSINATURAS ELETRONICAS
+CLÁUSULA SEXTA - DAS ASSINATURAS ELETRÔNICAS
 
-As partes declaram e concordam que este contrato podera ser assinado eletronicamente por meio de plataformas de assinatura digital, sendo as assinaturas consideradas validas, integras e plenamente eficazes para todos os fins de direito, nos termos da Medida Provisoria n 2.200-2/2001 e da Lei n 14.063/2020.
+As partes declaram e concordam que este contrato poderá ser assinado eletronicamente por meio de plataformas de assinatura digital, sendo as assinaturas consideradas válidas, íntegras e plenamente eficazes para todos os fins de direito, nos termos da Medida Provisória n 2.200-2/2001 e da Lei n 14.063/2020.
 
-CLAUSULA SETIMA - DO FORO
+CLÁUSULA SÉTIMA - DO FORO
 
-Fica eleito o foro da Comarca de {negrito(campo_ou_linha(dados["foro"], "Sao Francisco do Guapore - RO"))}, com renuncia expressa a qualquer outro, por mais privilegiado que seja, para dirimir eventuais controversias decorrentes deste contrato.
+Fica eleito o foro da Comarca de {negrito(campo_ou_linha(dados["foro"], "Sao Francisco do Guapore - RO"))}, com renúncia expressa a qualquer outro, por mais privilegiado que seja, para dirimir eventuais controvérsias decorrentes deste contrato.
 
-E, por estarem assim justos e contratados, firmam o presente instrumento em 02 (duas) vias de igual teor e forma, na presenca de 02 (duas) testemunhas abaixo assinadas.
+E, por estarem assim justos e contratados, firmam o presente instrumento em 02 (duas) vias de igual teor e forma, na presença de 02 (duas) testemunhas abaixo assinadas.
 
 {negrito(campo_ou_linha(dados["municipio_assinatura"], "Sao Francisco do Guapore - RO"))}, {negrito(dados["dia_assinatura"])} de {negrito(dados["mes_assinatura"])} de {negrito(dados["ano_assinatura"])}.
 
 
 ______________________________________________
-Credor - {negrito(campo_ou_linha(dados["credor_nome"], "NOME DO CREDOR"))}
+{assinatura_credor}
 
 
 ______________________________________________
-Devedor - {negrito(campo_ou_linha(dados["devedor_nome"], "NOME DO DEVEDOR"))}
+{assinatura_devedor}
 
 
 TESTEMUNHAS:

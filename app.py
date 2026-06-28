@@ -732,6 +732,12 @@ if contrato_importado is not None:
         st.info("Arquivo carregado. Clique no botão abaixo para copiar os dados do contrato anterior.")
         if st.button("📥 Importar dados do arquivo", type="primary"):
             aplicar_dados_importados(dados_importados)
+            for chave in (
+                "tabela_vencimentos_cheque_importada",
+                "tabela_vencimentos_cartao_importada",
+                "tabela_vencimentos_cheque_editor",
+            ):
+                st.session_state.pop(chave, None)
             st.success("Dados de credor e devedor importados do contrato anterior.")
             st.rerun()
     else:
@@ -924,6 +930,7 @@ with st.container():
                 exibir_warning_campo_numerico(cheque_unico_conta, "Conta")
 
             if not tabela_vencimentos_df.empty:
+                chave_editor_cheque = f"tabela_vencimentos_cheque_editor_{int(qtd_parcelas)}_{int(dias_atraso)}_{valor_cheque_base}"
                 tabela_vencimentos = st.data_editor(
                     tabela_vencimentos_df,
                     hide_index=True,
@@ -935,7 +942,7 @@ with st.container():
                             help="Informe o número do cheque correspondente a esta parcela.",
                         )
                     },
-                    key="tabela_vencimentos_cheque_editor",
+                    key=chave_editor_cheque,
                 ).to_dict("records")
                 st.caption(f"Soma das parcelas: {somar_valores_tabela(tabela_vencimentos)}")
         else:

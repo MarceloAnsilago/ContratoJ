@@ -449,6 +449,12 @@ def texto_padrao(dados: dict) -> str:
     def negrito(valor: str) -> str:
         return f"[[B]]{valor}[[/B]]"
 
+    def valor_documento(valor: str, padrao: str = "0,00") -> str:
+        numero = valor_monetario_para_decimal(valor)
+        if numero is None:
+            return padrao
+        return decimal_para_texto_monetario(numero)
+
     modalidades_pagamento = dados["modalidades_pagamento"]
     opcao1 = negrito("X") if "Cheque bancario" in modalidades_pagamento else " "
     opcao2 = negrito("X") if "Cartao de credito" in modalidades_pagamento else " "
@@ -456,7 +462,7 @@ def texto_padrao(dados: dict) -> str:
     entrada_valor = valor_monetario_para_decimal(dados["entrada"]) or Decimal("0")
     possui_entrada = entrada_valor > 0
     resumo_entrada = (
-        f"Desse total originario, foi paga entrada no valor de R$ {negrito(campo_ou_linha(dados['entrada'], '0,00'))} ({negrito(campo_ou_linha(valor_por_extenso(dados['entrada']), 'zero reais'))}). "
+        f"Desse total originario, foi paga entrada no valor de R$ {negrito(campo_ou_linha(valor_documento(dados['entrada']), '0,00'))} ({negrito(campo_ou_linha(valor_por_extenso(dados['entrada']), 'zero reais'))}). "
         if possui_entrada
         else ""
     )
@@ -512,7 +518,7 @@ As partes acima qualificadas tem entre si justo e contratado o presente instrume
 
 CLAUSULA PRIMEIRA - DA ORIGEM DA DIVIDA
 
-O DEVEDOR reconhece que a aquisicao objeto deste instrumento totalizou originalmente R$ {negrito(campo_ou_linha(dados["valor_total"], "___________________"))} ({negrito(campo_ou_linha(dados["valor_extenso"], "_______________________________________________________"))}), decorrente da aquisicao de animais bovinos realizada em leilao promovido em {negrito(dados["data_leilao"])}, conforme lote(s) n {negrito(campo_ou_linha(dados["lotes"], "_______________________________"))}, adquiridos pelo DEVEDOR. {resumo_entrada}Assim, o DEVEDOR confessa e assume como saldo devedor atual a quantia liquida, certa e exigivel de R$ {negrito(campo_ou_linha(dados["valor_remanescente"], "0,00"))} ({negrito(campo_ou_linha(valor_por_extenso(dados["valor_remanescente"]), "zero reais"))}), a ser paga da seguinte forma: {resumo_modalidades}.
+O DEVEDOR reconhece que a aquisicao objeto deste instrumento totalizou originalmente R$ {negrito(campo_ou_linha(valor_documento(dados["valor_total"], "___________________"), "___________________"))} ({negrito(campo_ou_linha(dados["valor_extenso"], "_______________________________________________________"))}), decorrente da aquisicao de animais bovinos realizada em leilao promovido em {negrito(dados["data_leilao"])}, conforme lote(s) n {negrito(campo_ou_linha(dados["lotes"], "_______________________________"))}, adquiridos pelo DEVEDOR. {resumo_entrada}Assim, o DEVEDOR confessa e assume como saldo devedor atual a quantia liquida, certa e exigivel de R$ {negrito(campo_ou_linha(dados["valor_remanescente"], "0,00"))} ({negrito(campo_ou_linha(valor_por_extenso(dados["valor_remanescente"]), "zero reais"))}), a ser paga da seguinte forma: {resumo_modalidades}.
 
 CLAUSULA SEGUNDA - DO VALOR E FORMA DE PAGAMENTO
 

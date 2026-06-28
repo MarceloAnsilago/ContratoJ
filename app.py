@@ -198,8 +198,6 @@ def decimal_para_texto_monetario(valor: Decimal) -> str:
 def sincronizar_valores_pagamento() -> None:
     valor_total = str(st.session_state.get("valor_total", "")).strip()
     entrada = str(st.session_state.get("entrada", "")).strip() or "0"
-    st.session_state["valor_total"] = valor_total
-    st.session_state["entrada"] = entrada
 
     valor_remanescente = valor_remanescente_calculado(valor_total, entrada)
     st.session_state["valor_atual_exibicao"] = valor_remanescente
@@ -220,11 +218,9 @@ def sincronizar_valores_pagamento() -> None:
 
         if valor_cheque_decimal < 0:
             valor_cheque_decimal = Decimal("0")
-            st.session_state["valor_cheque_divisao"] = "0"
 
         if valor_cheque_decimal > remanescente_decimal:
             valor_cheque_decimal = remanescente_decimal
-            st.session_state["valor_cheque_divisao"] = decimal_para_texto_monetario(valor_cheque_decimal)
 
         st.session_state["valor_cartao_divisao_exibicao"] = decimal_para_texto_monetario(
             remanescente_decimal - valor_cheque_decimal

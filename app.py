@@ -563,14 +563,12 @@ E, por estarem assim justos e contratados, firmam o presente instrumento em 02 (
 {negrito(campo_ou_linha(dados["municipio_assinatura"], "Sao Francisco do Guapore - RO"))}, {negrito(dados["dia_assinatura"])} de {negrito(dados["mes_assinatura"])} de {negrito(dados["ano_assinatura"])}.
 
 
+______________________________________________
 Credor - {negrito(campo_ou_linha(dados["credor_nome"], "NOME DO CREDOR"))}
 
+
 ______________________________________________
-
-
 Devedor - {negrito(campo_ou_linha(dados["devedor_nome"], "NOME DO DEVEDOR"))}
-
-______________________________________________
 
 
 TESTEMUNHAS:

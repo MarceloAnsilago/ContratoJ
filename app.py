@@ -435,7 +435,7 @@ Valor destinado ao cheque: R$ {negrito(campo_ou_linha(dados["valor_cheque_base"]
 Cronograma de vencimentos do cheque:
 {montar_cronograma_contrato(dados["tabela_vencimentos_cheque"])}
 
-Dados do cheque: Banco: {negrito(campo_ou_linha(dados["cheque_unico_banco"], "_______"))} | Agencia: {negrito(campo_ou_linha(dados["cheque_unico_agencia"], "___________"))} | Conta: {negrito(campo_ou_linha(dados["cheque_unico_conta"], "____________"))} | Cheque n: {negrito(campo_ou_linha(dados["cheque_unico_numero"], "______________"))}.
+Dados do cheque: Banco: {negrito(campo_ou_linha(dados["cheque_unico_banco"], "_______"))} | Agencia: {negrito(campo_ou_linha(dados["cheque_unico_agencia"], "___________"))} | Conta: {negrito(campo_ou_linha(dados["cheque_unico_conta"], "____________"))} | Cheque(s) n°: {negrito(campo_ou_linha(dados["cheque_unico_numero"], "000185-000186-000187"))}.
 """
 
     bloco_cartao = ""
@@ -690,7 +690,11 @@ with st.container():
             with col_cheque3:
                 cheque_unico_conta = st.text_input("Conta", key="cheque_unico_conta")
             with col_cheque4:
-                cheque_unico_numero = st.text_input("Cheque n", key="cheque_unico_numero")
+                cheque_unico_numero = st.text_input(
+                    "Cheque(s) n°",
+                    key="cheque_unico_numero",
+                    placeholder="000185-000186-000187",
+                )
         else:
             qtd_parcelas = st.session_state.get("qtd_parcelas", 4)
             dias_atraso = st.session_state.get("dias_atraso", 30)

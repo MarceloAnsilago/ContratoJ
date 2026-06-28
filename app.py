@@ -1,7 +1,7 @@
 import re
 import textwrap
 import unicodedata
-from datetime import date, timedelta, datetime
+from datetime import date, timedelta
 from decimal import Decimal, InvalidOperation
 from io import BytesIO
 
@@ -425,10 +425,10 @@ def extrair_tabela_cronograma(texto: str, rotulo: str, incluir_cheque: bool) -> 
     return linhas
 
 
-def extrair_partes_importadas(texto: str) -> dict[str, object]:
+def extrair_partes_importadas(texto: str) -> dict[str, str]:
     texto_normalizado = normalizar_texto_importado(texto)
 
-    dados: dict[str, object] = {}
+    dados: dict[str, str] = {}
 
     bloco_credor = extrair_bloco_entre(
         texto_normalizado,
@@ -437,7 +437,7 @@ def extrair_partes_importadas(texto: str) -> dict[str, object]:
     )
     if bloco_credor:
         padrao_credor = re.compile(
-            r"(?P<nome>.*?),\s*inscrito\(a\)\s*no\s*CPF/CNPJ\s*n(?:º|°|o)?\s*(?P<doc>.*?),\s*com\s*endereco\s*a\s*(?P<endereco>.*?);?$",
+            r"(?P<nome>.*?),\s*inscrito\(a\)\s*no\s*CPF/CNPJ\s*n(?:?|?|o)?\s*(?P<doc>.*?),\s*com\s*endereco\s*a\s*(?P<endereco>.*?);?$",
             re.IGNORECASE,
         )
         credor = padrao_credor.search(bloco_credor)
@@ -449,18 +449,11 @@ def extrair_partes_importadas(texto: str) -> dict[str, object]:
     bloco_devedor = extrair_bloco_entre(
         texto_normalizado,
         "DEVEDOR:",
-        [
-            "CLAUSULA PRIMEIRA",
-            "CL?USULA PRIMEIRA",
-            "CLAUSULA SEGUNDA",
-            "CL?USULA SEGUNDA",
-            "E, por estarem",
-            "E, por estarem assim",
-        ],
+        ["CLAUSULA PRIMEIRA", "CL?USULA PRIMEIRA", "CLAUSULA SEGUNDA", "CL?USULA SEGUNDA", "E, por estarem"],
     )
     if bloco_devedor:
         padrao_devedor = re.compile(
-            r"(?P<nome>.*?),\s*inscrito\(a\)\s*no\s*CPF\s*n(?:º|°|o)?\s*(?P<cpf>.*?),\s*portador\(a\)\s*do\s*RG\s*n(?:º|°|o)?\s*(?P<rg>.*?),\s*residente\s*e\s*domiciliado\(a\)\s*a\s*(?P<endereco>.*?);?$",
+            r"(?P<nome>.*?),\s*inscrito\(a\)\s*no\s*CPF\s*n(?:?|?|o)?\s*(?P<cpf>.*?),\s*portador\(a\)\s*do\s*RG\s*n(?:?|?|o)?\s*(?P<rg>.*?),\s*residente\s*e\s*domiciliado\(a\)\s*a\s*(?P<endereco>.*?);?$",
             re.IGNORECASE,
         )
         devedor = padrao_devedor.search(bloco_devedor)
@@ -470,165 +463,26 @@ def extrair_partes_importadas(texto: str) -> dict[str, object]:
             dados["devedor_rg"] = limpar_campo_importado(devedor.group("rg"))
             dados["devedor_endereco"] = limpar_campo_importado(devedor.group("endereco"))
 
-    valor_total = re.search(r"totalizou originalmente R\$\s*(?P<valor>[\d\.,]+)", texto_normalizado, re.IGNORECASE)
-    if valor_total:
-        dados["valor_total"] = limpar_campo_importado(valor_total.group("valor"))
-
-    entrada = re.search(r"entrada no valor de R\$\s*(?P<valor>[\d\.,]+)", texto_normalizado, re.IGNORECASE)
-    if entrada:
-        dados["entrada"] = limpar_campo_importado(entrada.group("valor"))
-
-    valor_remanescente = re.search(
-        r"saldo devedor atual a quantia liquida, certa e exigivel de R\$\s*(?P<valor>[\d\.,]+)",
-        texto_normalizado,
-        re.IGNORECASE,
-    )
-    if valor_remanescente:
-        dados["valor_remanescente"] = limpar_campo_importado(valor_remanescente.group("valor"))
-
-    data_leilao = re.search(r"leilao promovido em\s*(?P<data>\d{2}/\d{2}/\d{4})", texto_normalizado, re.IGNORECASE)
-    if data_leilao:
-        dados["data_leilao"] = data_leilao.group("data")
-
-    lotes = re.search(r"conforme lote\(s\)\s*n\s*(?P<lotes>.*?),\s*adquiridos", texto_normalizado, re.IGNORECASE)
-    if lotes:
-        dados["lotes"] = limpar_campo_importado(lotes.group("lotes"))
-
-    modalidades = []
-    if re.search(r"Opcao 1 - Cheque bancario", texto_normalizado, re.IGNORECASE):
-        modalidades.append("Cheque bancario")
-    if re.search(r"Opcao 2 - Cartao de credito", texto_normalizado, re.IGNORECASE):
-        modalidades.append("Cartao de credito")
-    if modalidades:
-        dados["modalidades_pagamento"] = modalidades
-
-    valor_cheque = re.search(r"Valor destinado ao cheque:\s*R\$\s*(?P<valor>[\d\.,]+)", texto_normalizado, re.IGNORECASE)
-    if valor_cheque:
-        dados["valor_cheque_base"] = limpar_campo_importado(valor_cheque.group("valor"))
-
-    valor_cartao = re.search(r"Valor destinado ao cartao:\s*R\$\s*(?P<valor>[\d\.,]+)", texto_normalizado, re.IGNORECASE)
-    if valor_cartao:
-        dados["valor_cartao_base"] = limpar_campo_importado(valor_cartao.group("valor"))
-
-    dias_atraso = re.search(r"atraso superior a\s*(?P<dias>\d+)\s*\(", texto_normalizado, re.IGNORECASE)
-    if dias_atraso:
-        dados["dias_atraso"] = int(dias_atraso.group("dias"))
-        dados["dias_atraso_cartao"] = int(dias_atraso.group("dias"))
-
-    foro = re.search(r"foro da Comarca de\s*(?P<foro>.*?),\s*com renuncia", texto_normalizado, re.IGNORECASE)
-    if foro:
-        dados["foro"] = limpar_campo_importado(foro.group("foro"))
-
-    municipio = re.search(r"(?P<municipio>.*?),\s*\d{2}\s*de\s*[A-Za-z]+\s*de\s*\d{4}\.", texto_normalizado, re.IGNORECASE)
-    if municipio:
-        dados["municipio_assinatura"] = limpar_campo_importado(municipio.group("municipio"))
-
-    data_assinatura = re.search(
-        r"(?P<dia>\d{2})\s*de\s*(?P<mes>[A-Za-z]+)\s*de\s*(?P<ano>\d{4})\.",
-        texto_normalizado,
-        re.IGNORECASE,
-    )
-    if data_assinatura:
-        dados["dia_assinatura"] = data_assinatura.group("dia")
-        dados["mes_assinatura"] = data_assinatura.group("mes").lower()
-        dados["ano_assinatura"] = data_assinatura.group("ano")
-
-    credor_assinatura = re.search(r"Credor\s*-\s*(?P<nome>.+)", texto_normalizado, re.IGNORECASE)
-    if credor_assinatura:
-        dados["credor_nome"] = limpar_campo_importado(credor_assinatura.group("nome"))
-
-    devedor_assinatura = re.search(r"Devedor\s*-\s*(?P<nome>.+)", texto_normalizado, re.IGNORECASE)
-    if devedor_assinatura:
-        dados["devedor_nome"] = limpar_campo_importado(devedor_assinatura.group("nome"))
-
-    testemunhas = re.findall(r"Nome:\s*(.*?)\s*CPF:\s*(.*?)(?:\n|$)", texto_normalizado, re.IGNORECASE)
-    if len(testemunhas) > 0:
-        dados["testemunha1_nome"] = limpar_campo_importado(testemunhas[0][0])
-        dados["testemunha1_cpf"] = limpar_campo_importado(testemunhas[0][1])
-    if len(testemunhas) > 1:
-        dados["testemunha2_nome"] = limpar_campo_importado(testemunhas[1][0])
-        dados["testemunha2_cpf"] = limpar_campo_importado(testemunhas[1][1])
-
-    tabela_cheque = extrair_tabela_cronograma(texto_normalizado, "Cronograma de vencimentos do cheque", incluir_cheque=True)
-    if tabela_cheque:
-        dados["tabela_vencimentos_cheque_importada"] = tabela_cheque
-        dados["qtd_parcelas"] = len(tabela_cheque)
-
-    tabela_cartao = extrair_tabela_cronograma(texto_normalizado, "Cronograma de vencimentos do cartao", incluir_cheque=False)
-    if tabela_cartao:
-        dados["tabela_vencimentos_cartao_importada"] = tabela_cartao
-        dados["qtd_parcelas_cartao"] = len(tabela_cartao)
-
-    if "valor_total" in dados and "entrada" in dados:
-        valor_total_num = valor_monetario_para_decimal(str(dados["valor_total"]))
-        entrada_num = valor_monetario_para_decimal(str(dados["entrada"])) or Decimal("0")
-        if valor_total_num is not None:
-            remanescente = valor_total_num - entrada_num
-            if remanescente < 0:
-                remanescente = Decimal("0")
-            dados["valor_remanescente"] = decimal_para_texto_monetario(remanescente)
-
-    return {chave: valor for chave, valor in dados.items() if valor not in ("", None, [])}
+    return {chave: valor for chave, valor in dados.items() if valor}
 
 
-def aplicar_dados_importados(dados_importados: dict[str, object]) -> None:
+def aplicar_dados_importados(dados_importados: dict[str, str]) -> None:
     if not dados_importados:
         return
 
-    dados = dict(dados_importados)
+    campos_permitidos = {
+        "credor_nome",
+        "credor_doc",
+        "credor_endereco",
+        "devedor_nome",
+        "devedor_cpf",
+        "devedor_rg",
+        "devedor_endereco",
+    }
 
-    data_leilao_texto = dados.pop("data_leilao", None)
-    if isinstance(data_leilao_texto, str):
-        try:
-            st.session_state["data_leilao"] = datetime.strptime(data_leilao_texto, "%d/%m/%Y").date()
-        except ValueError:
-            pass
-
-    dia_assinatura = dados.pop("dia_assinatura", None)
-    mes_assinatura = dados.pop("mes_assinatura", None)
-    ano_assinatura = dados.pop("ano_assinatura", None)
-    if dia_assinatura and mes_assinatura and ano_assinatura:
-        meses_inversos = {nome: numero for numero, nome in MESES.items()}
-        mes_numero = meses_inversos.get(str(mes_assinatura).lower())
-        if mes_numero:
-            try:
-                st.session_state["data_assinatura"] = date(int(ano_assinatura), mes_numero, int(dia_assinatura))
-            except ValueError:
-                pass
-
-    tabela_cheque = dados.pop("tabela_vencimentos_cheque_importada", None)
-    tabela_cartao = dados.pop("tabela_vencimentos_cartao_importada", None)
-
-    for chave, valor in dados.items():
-        st.session_state[chave] = valor
-
-    if tabela_cheque:
-        st.session_state["tabela_vencimentos_cheque_importada"] = tabela_cheque
-        st.session_state.pop("tabela_vencimentos_cheque_editor", None)
-
-    if tabela_cartao:
-        st.session_state["tabela_vencimentos_cartao_importada"] = tabela_cartao
-
-    if isinstance(tabela_cheque, list) and len(tabela_cheque) > 1:
-        try:
-            data1 = datetime.strptime(tabela_cheque[0]["Vencimento"], "%d/%m/%Y").date()
-            data2 = datetime.strptime(tabela_cheque[1]["Vencimento"], "%d/%m/%Y").date()
-            st.session_state["dias_atraso"] = max((data2 - data1).days, 1)
-        except Exception:
-            pass
-        st.session_state["qtd_parcelas"] = len(tabela_cheque)
-
-    if isinstance(tabela_cartao, list) and len(tabela_cartao) > 1:
-        try:
-            data1 = datetime.strptime(tabela_cartao[0]["Vencimento"], "%d/%m/%Y").date()
-            data2 = datetime.strptime(tabela_cartao[1]["Vencimento"], "%d/%m/%Y").date()
-            st.session_state["dias_atraso_cartao"] = max((data2 - data1).days, 1)
-        except Exception:
-            pass
-        st.session_state["qtd_parcelas_cartao"] = len(tabela_cartao)
-
-    if "valor_cheque_base" in dados and "Cheque bancario" in st.session_state.get("modalidades_pagamento", []):
-        st.session_state["valor_cheque_divisao"] = str(dados["valor_cheque_base"])
+    for chave, valor in dados_importados.items():
+        if chave in campos_permitidos:
+            st.session_state[chave] = valor
 
 def inicializar_estado_formulario() -> None:
     defaults = {
@@ -870,7 +724,7 @@ if contrato_importado is not None:
         st.info("Arquivo carregado. Clique no botão abaixo para copiar os dados do contrato anterior.")
         if st.button("📥 Importar dados do arquivo", type="primary"):
             aplicar_dados_importados(dados_importados)
-            st.success("Dados do contrato importados do arquivo anterior.")
+            st.success("Dados de credor e devedor importados do contrato anterior.")
             st.rerun()
     else:
         st.warning("Não foi possível localizar automaticamente os dados do contrato nesse arquivo.")

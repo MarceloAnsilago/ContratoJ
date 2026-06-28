@@ -541,13 +541,12 @@ with st.container():
             OPCOES_MODALIDADES_PAGAMENTO,
             key="modalidades_pagamento",
         )
-        col_entrada, col_valor_remanescente, col_valor_remanescente_extenso = st.columns(3)
+        col_com_entrada, col_entrada, col_valor_remanescente_extenso = st.columns(3)
+        with col_com_entrada:
+            st.text_input("Com entrada?", value="Sim", disabled=True, key="com_entrada_exibicao")
         with col_entrada:
-            entrada = st.text_input("Com entrada?", key="entrada", on_change=atualizar_entrada)
+            entrada = st.text_input("Informe o valor:", key="entrada", on_change=atualizar_entrada)
         valor_remanescente = valor_remanescente_calculado(valor_total, entrada)
-        st.session_state["valor_remanescente_exibicao"] = valor_remanescente
-        with col_valor_remanescente:
-            st.text_input("Valor remanescente", disabled=True, key="valor_remanescente_exibicao")
         with col_valor_remanescente_extenso:
             st.text_input("Valor remanescente por extenso", value=valor_por_extenso(valor_remanescente), disabled=True, key="valor_remanescente_extenso_exibicao")
         mostrar_formulario_cheque = any(
@@ -558,7 +557,7 @@ with st.container():
 
         if mostrar_formulario_cheque:
             st.markdown("### Para cheque")
-            col_qtd_parcelas, col_dias_parcela, col_valor_parcela = st.columns(3)
+            col_qtd_parcelas, col_dias_parcela = st.columns(2)
             with col_qtd_parcelas:
                 qtd_parcelas = st.number_input("QTD parcelas (mensais)", min_value=1, step=1, key="qtd_parcelas")
             with col_dias_parcela:
@@ -567,13 +566,7 @@ with st.container():
                     options=OPCOES_DIAS_PARCELA,
                     key="dias_atraso",
                 )
-            with col_valor_parcela:
-                valor_parcela = st.text_input(
-                    "Valor da parcela",
-                    value=valor_parcela_calculado(valor_remanescente, int(qtd_parcelas)),
-                    disabled=True,
-                    key="valor_parcela_cheque_exibicao",
-                )
+            valor_parcela = valor_parcela_calculado(valor_remanescente, int(qtd_parcelas))
 
             st.markdown("### Tabela de vencimentos")
             tabela_vencimentos = gerar_tabela_vencimentos(
@@ -608,7 +601,7 @@ with st.container():
 
         if mostrar_formulario_cartao:
             st.markdown("### Para Cartao de Credito")
-            col_qtd_parcelas_cartao, col_dias_parcela_cartao, col_valor_parcela_cartao = st.columns(3)
+            col_qtd_parcelas_cartao, col_dias_parcela_cartao = st.columns(2)
             with col_qtd_parcelas_cartao:
                 qtd_parcelas_cartao = st.number_input("QTD parcelas (mensais)", min_value=1, step=1, key="qtd_parcelas_cartao")
             with col_dias_parcela_cartao:
@@ -617,13 +610,7 @@ with st.container():
                     options=OPCOES_DIAS_PARCELA,
                     key="dias_atraso_cartao",
                 )
-            with col_valor_parcela_cartao:
-                valor_parcela_cartao = st.text_input(
-                    "Valor da parcela",
-                    value=valor_parcela_calculado(valor_remanescente, int(qtd_parcelas_cartao)),
-                    disabled=True,
-                    key="valor_parcela_cartao_exibicao",
-                )
+            valor_parcela_cartao = valor_parcela_calculado(valor_remanescente, int(qtd_parcelas_cartao))
 
             st.markdown("### Tabela de vencimentos")
             tabela_vencimentos_cartao = gerar_tabela_vencimentos(

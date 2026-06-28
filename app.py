@@ -28,17 +28,19 @@ MESES = {
 }
 
 OPCOES_MODALIDADES_PAGAMENTO = [
-    "Cheque único para 120 dias",
-    "Cheques pré-datados parcelados",
-    "Cartão de crédito",
+    "Cheque bancario",
+    "Cartao de credito",
 ]
 
 OPCOES_DIAS_PARCELA = [30, 60, 90, 120]
 
 MAPA_MODALIDADES_LEGADAS = {
-    "Cheque Ãºnico para 120 dias": "Cheque único para 120 dias",
-    "Cheques prÃ©-datados parcelados": "Cheques pré-datados parcelados",
-    "CartÃ£o de crÃ©dito": "Cartão de crédito",
+    "Cheque ????nico para 120 dias": "Cheque bancario",
+    "Cheques pr????-datados parcelados": "Cheque bancario",
+    "Cart????o de cr????dito": "Cartao de credito",
+    "Cheque ??nico para 120 dias": "Cheque bancario",
+    "Cheques pr??-datados parcelados": "Cheque bancario",
+    "Cart??o de cr??dito": "Cartao de credito",
 }
 
 
@@ -321,7 +323,7 @@ def inicializar_estado_formulario() -> None:
         "qtd_parcelas_cartao": 4,
         "entrada": "0",
         "valor_cheque_divisao": "",
-        "modalidades_pagamento": ["Cheque único para 120 dias"],
+        "modalidades_pagamento": ["Cheque bancario"],
         "valor_parcela": "",
         "dias_atraso": 30,
         "dias_atraso_cartao": 30,
@@ -363,7 +365,7 @@ def inicializar_estado_formulario() -> None:
             modalidades_normalizadas.append(modalidade_normalizada)
 
     if not modalidades_normalizadas:
-        modalidades_normalizadas = ["Cheque único para 120 dias"]
+        modalidades_normalizadas = ["Cheque bancario"]
 
     st.session_state["modalidades_pagamento"] = modalidades_normalizadas
 
@@ -389,9 +391,9 @@ def texto_padrao(dados: dict) -> str:
         return f"[[B]]{valor}[[/B]]"
 
     modalidades_pagamento = dados["modalidades_pagamento"]
-    opcao1 = negrito("X") if "Cheque único para 120 dias" in modalidades_pagamento else " "
-    opcao2 = negrito("X") if "Cheques pré-datados parcelados" in modalidades_pagamento else " "
-    opcao3 = negrito("X") if "Cartão de crédito" in modalidades_pagamento else " "
+    opcao1 = negrito("X") if "Cheque bancario" in modalidades_pagamento else " "
+    opcao2 = negrito("X") if "Cartao de credito" in modalidades_pagamento else " "
+    opcao3 = " "
 
     return f"""CONTRATO DE CONFISSÃO DE DÍVIDA
 
@@ -413,22 +415,16 @@ CLÁUSULA SEGUNDA - DO VALOR E FORMA DE PAGAMENTO
 
 O valor total da dívida confessada é de R$ {negrito(campo_ou_linha(dados["valor_total"], "__________________"))} ({negrito(campo_ou_linha(dados["valor_extenso"], "________________________________________________________"))}), cujo pagamento será realizado por uma das modalidades abaixo, expressamente escolhida e assinalada pelo DEVEDOR no ato da assinatura deste instrumento:
 
-[{opcao1}] Opção 1 - Cheque único para 120 dias:
+[{opcao1}] Opcao 1 - Cheque bancario:
 
-Pagamento mediante a entrega de 01 (um) cheque pré-datado para vencimento em 120 (cento e vinte) dias contados da data da aquisição dos animais.
+Pagamento mediante cheque bancario, conforme dados informados neste instrumento.
 
-Dados do Cheque: Banco: {negrito(campo_ou_linha(dados["cheque_unico_banco"], "_______"))} | Agência: {negrito(campo_ou_linha(dados["cheque_unico_agencia"], "___________"))} | Conta: {negrito(campo_ou_linha(dados["cheque_unico_conta"], "____________"))} | Cheque nº:{negrito(campo_ou_linha(dados["cheque_unico_numero"], "______________"))}.
+Dados do Cheque: Banco: {negrito(campo_ou_linha(dados["cheque_unico_banco"], "_______"))} | Agencia: {negrito(campo_ou_linha(dados["cheque_unico_agencia"], "___________"))} | Conta: {negrito(campo_ou_linha(dados["cheque_unico_conta"], "____________"))} | Cheque n: {negrito(campo_ou_linha(dados["cheque_unico_numero"], "______________"))}.
 
-[{opcao2}] Opção 2 - Pagamento por meio de cheques pré-datados parcelados
+[{opcao2}] Opcao 2 - Pagamento mediante cartao de credito:
 
-O valor total será quitado mediante a entrega de 04 (quatro) cheques pré-datados, correspondentes a parcelas iguais e sucessivas de R$ {negrito(campo_ou_linha(dados["valor_parcela"], "VALOR DA PARCELA"))}, com os seguintes vencimentos:
+O valor total da aquisicao sera pago por meio de cartao de credito, em parcelas sucessivas de R$ {negrito(campo_ou_linha(dados["valor_parcela_cartao"], "VALOR DA PARCELA"))}, conforme aprovacao da operadora do cartao e condicoes financeiras vigentes na data da operacao.
 
-{negrito(dados["parcela1_data"])} (30 dias) - Cheque nº: {negrito(campo_ou_linha(dados["parcela1_cheque"], "_______________"))} | Banco: {negrito(campo_ou_linha(dados["parcela1_banco"], "_________"))}
-{negrito(dados["parcela2_data"])} (60 dias) - Cheque nº: {negrito(campo_ou_linha(dados["parcela2_cheque"], "_______________"))} | Banco: {negrito(campo_ou_linha(dados["parcela2_banco"], "_________"))}
-{negrito(dados["parcela3_data"])} (90 dias) - Cheque nº: {negrito(campo_ou_linha(dados["parcela3_cheque"], "_______________"))} | Banco: {negrito(campo_ou_linha(dados["parcela3_banco"], "_________"))}
-{negrito(dados["parcela4_data"])} (120 dias) - Cheque nº: {negrito(campo_ou_linha(dados["parcela4_cheque"], "_______________"))} | Banco: {negrito(campo_ou_linha(dados["parcela4_banco"], "_________"))}
-
-[{opcao3}] Opção 3 - Pagamento mediante cartão de crédito: O valor total da aquisição será pago por meio de cartão de crédito, em até 04 (quatro) parcelas mensais, conforme aprovação da operadora do cartão e condições financeiras vigentes na data da operação.
 
 Parágrafo primeiro. A modalidade de pagamento escolhida pelo DEVEDOR e assinalada acima integrará este contrato para todos os efeitos legais.
 
@@ -572,11 +568,8 @@ with st.container():
             st.text_input("Valor atual", disabled=True, key="valor_atual_exibicao")
         with col_valor_remanescente_extenso:
             st.text_input("Valor remanescente por extenso", disabled=True, key="valor_remanescente_extenso_exibicao")
-        mostrar_formulario_cheque = any(
-            modalidade in modalidades_pagamento
-            for modalidade in OPCOES_MODALIDADES_PAGAMENTO[:2]
-        )
-        mostrar_formulario_cartao = OPCOES_MODALIDADES_PAGAMENTO[2] in modalidades_pagamento
+        mostrar_formulario_cheque = "Cheque bancario" in modalidades_pagamento
+        mostrar_formulario_cartao = "Cartao de credito" in modalidades_pagamento
         valor_cheque_base = valor_remanescente
         valor_cartao_base = valor_remanescente
         valor_divisao_informado = True

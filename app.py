@@ -543,7 +543,7 @@ with st.container():
         )
         col_com_entrada, col_entrada, col_valor_remanescente_extenso = st.columns(3)
         with col_com_entrada:
-            st.text_input("Com entrada?", value="Sim", disabled=True, key="com_entrada_exibicao")
+            st.markdown("Com entrada?")
         with col_entrada:
             entrada = st.text_input("Informe o valor:", key="entrada", on_change=atualizar_entrada)
         valor_remanescente = valor_remanescente_calculado(valor_total, entrada)

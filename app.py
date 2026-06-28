@@ -94,6 +94,14 @@ st.markdown(
     [data-testid="stForm"] textarea {
         border-radius: 6px;
     }
+    .streamlit-expanderContent,
+    [data-testid="stExpander"] details > div,
+    [data-testid="stExpander"] [data-testid="stVerticalBlock"] {
+        background: #ffffff;
+    }
+    [data-testid="stExpander"] {
+        background: #ffffff;
+    }
     .titulo-contrato {
         display: flex;
         align-items: center;

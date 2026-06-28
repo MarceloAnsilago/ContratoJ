@@ -536,8 +536,12 @@ with st.container():
             OPCOES_MODALIDADES_PAGAMENTO,
             key="modalidades_pagamento",
         )
-        entrada = st.text_input("Entrada", key="entrada")
+        col_entrada, col_valor_remanescente = st.columns(2)
+        with col_entrada:
+            entrada = st.text_input("Com entrada?", key="entrada")
         valor_remanescente = valor_remanescente_calculado(valor_total, entrada)
+        with col_valor_remanescente:
+            st.text_input("Valor remanescente", value=valor_remanescente, disabled=True, key="valor_remanescente_exibicao")
         mostrar_formulario_cheque = any(
             modalidade in modalidades_pagamento
             for modalidade in OPCOES_MODALIDADES_PAGAMENTO[:2]

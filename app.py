@@ -195,6 +195,15 @@ def decimal_para_texto_monetario(valor: Decimal) -> str:
     return texto.replace(",", "X").replace(".", ",").replace("X", ".")
 
 
+def campo_numerico_tem_letras(valor: str) -> bool:
+    return bool(re.search(r"[A-Za-zÀ-ÿ]", str(valor or "")))
+
+
+def exibir_warning_campo_numerico(valor: str, label: str) -> None:
+    if campo_numerico_tem_letras(valor):
+        st.warning(f"O campo {label.lower()} nao aceita letras.")
+
+
 def sincronizar_valores_pagamento() -> None:
     valor_total = str(st.session_state.get("valor_total", "")).strip()
     entrada = str(st.session_state.get("entrada", "")).strip() or "0"
@@ -615,6 +624,7 @@ with st.container():
             st.markdown("### Credor")
             credor_nome = st.text_input("Nome do credor ou leiloeira", key="credor_nome")
             credor_doc = st.text_input("CPF/CNPJ do credor", key="credor_doc")
+            exibir_warning_campo_numerico(credor_doc, "CPF/CNPJ do credor")
             credor_endereco = st.text_area("Endereco do credor", key="credor_endereco", height=95)
 
         with col_devedor:
@@ -623,8 +633,10 @@ with st.container():
             devedor_doc_col, devedor_rg_col = st.columns(2)
             with devedor_doc_col:
                 devedor_cpf = st.text_input("CPF do devedor", key="devedor_cpf")
+                exibir_warning_campo_numerico(devedor_cpf, "CPF do devedor")
             with devedor_rg_col:
                 devedor_rg = st.text_input("RG do devedor", key="devedor_rg")
+                exibir_warning_campo_numerico(devedor_rg, "RG do devedor")
             devedor_endereco = st.text_area("Endereco do devedor", key="devedor_endereco", height=95)
 
         botoes_col1, botoes_col2, botoes_col3 = st.columns([1, 1, 1])
@@ -645,10 +657,12 @@ with st.container():
         with col_divida:
             st.text_input("D\u00edvida", key="valor_total", on_change=atualizar_valor_total)
             valor_total = st.session_state.get("valor_total", "")
+            exibir_warning_campo_numerico(valor_total, "Divida")
         with col_valor_extenso:
             valor_extenso = st.text_input("Valor por extenso", valor_por_extenso(valor_total), disabled=True)
 
         lotes = st.text_input("N\u00famero dos lotes", "")
+        exibir_warning_campo_numerico(lotes, "Numero dos lotes")
 
         st.markdown("### Pagamento")
         modalidades_pagamento = st.multiselect(
@@ -661,6 +675,7 @@ with st.container():
         with col_entrada:
             st.text_input("Com entrada? Informe o valor:", key="entrada", on_change=atualizar_entrada)
             entrada = st.session_state.get("entrada", "0")
+            exibir_warning_campo_numerico(entrada, "Com entrada? Informe o valor")
         sincronizar_valores_pagamento()
         valor_remanescente = st.session_state.get("valor_atual_exibicao", "")
         with col_valor_atual:
@@ -683,6 +698,7 @@ with st.container():
                     key="valor_cheque_divisao",
                     on_change=atualizar_valor_cheque_divisao,
                 )
+                exibir_warning_campo_numerico(valor_cheque_divisao, "Do valor remanescente, quanto sera pago com cheque")
             valor_divisao_informado = str(valor_cheque_divisao).strip() != ""
             valor_divisao_valido = valor_divisao_informado
 
@@ -741,14 +757,17 @@ with st.container():
                 cheque_unico_banco = st.text_input("Banco", key="cheque_unico_banco")
             with col_cheque2:
                 cheque_unico_agencia = st.text_input("Agencia", key="cheque_unico_agencia")
+                exibir_warning_campo_numerico(cheque_unico_agencia, "Agencia")
             with col_cheque3:
                 cheque_unico_conta = st.text_input("Conta", key="cheque_unico_conta")
+                exibir_warning_campo_numerico(cheque_unico_conta, "Conta")
             with col_cheque4:
                 cheque_unico_numero = st.text_input(
                     "Cheque(s) n°",
                     key="cheque_unico_numero",
                     placeholder="000185-000186-000187",
                 )
+                exibir_warning_campo_numerico(cheque_unico_numero, "Cheque(s) n°")
         else:
             qtd_parcelas = st.session_state.get("qtd_parcelas", 4)
             dias_atraso = st.session_state.get("dias_atraso", 30)
@@ -789,14 +808,17 @@ with st.container():
                 cartao_credito_banco = st.text_input("Banco", key="cartao_credito_banco")
             with col_cartao2:
                 cartao_credito_agencia = st.text_input("Agencia", key="cartao_credito_agencia")
+                exibir_warning_campo_numerico(cartao_credito_agencia, "Agencia")
             with col_cartao3:
                 cartao_credito_conta = st.text_input("Conta", key="cartao_credito_conta")
+                exibir_warning_campo_numerico(cartao_credito_conta, "Conta")
             with col_cartao4:
                 cartao_credito_numero = st.text_input(
                     "Numero",
                     key="cartao_credito_numero",
                     placeholder="0000 0000 0000 0000 12/30",
                 )
+                exibir_warning_campo_numerico(cartao_credito_numero, "Numero")
         else:
             qtd_parcelas_cartao = st.session_state.get("qtd_parcelas_cartao", 4)
             dias_atraso_cartao = st.session_state.get("dias_atraso_cartao", 30)
@@ -817,11 +839,13 @@ with st.container():
             st.markdown("### Testemunha 1")
             testemunha1_nome = st.text_input("Nome da testemunha 1", key="testemunha1_nome")
             testemunha1_cpf = st.text_input("CPF da testemunha 1", key="testemunha1_cpf")
+            exibir_warning_campo_numerico(testemunha1_cpf, "CPF da testemunha 1")
 
         with col_testemunha2:
             st.markdown("### Testemunha 2")
             testemunha2_nome = st.text_input("Nome da testemunha 2", key="testemunha2_nome")
             testemunha2_cpf = st.text_input("CPF da testemunha 2", key="testemunha2_cpf")
+            exibir_warning_campo_numerico(testemunha2_cpf, "CPF da testemunha 2")
 
     atualizar_preview = st.button("🔄 Atualizar pré-visualização", width="stretch")
 

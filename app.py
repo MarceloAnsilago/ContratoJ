@@ -747,7 +747,11 @@ with st.container():
             with col_cartao3:
                 cartao_credito_conta = st.text_input("Conta", key="cartao_credito_conta")
             with col_cartao4:
-                cartao_credito_numero = st.text_input("Numero", key="cartao_credito_numero")
+                cartao_credito_numero = st.text_input(
+                    "Numero",
+                    key="cartao_credito_numero",
+                    placeholder="0000 0000 0000 0000 12/30",
+                )
         else:
             qtd_parcelas_cartao = st.session_state.get("qtd_parcelas_cartao", 4)
             dias_atraso_cartao = st.session_state.get("dias_atraso_cartao", 30)

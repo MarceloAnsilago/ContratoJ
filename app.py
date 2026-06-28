@@ -541,14 +541,16 @@ with st.container():
             OPCOES_MODALIDADES_PAGAMENTO,
             key="modalidades_pagamento",
         )
-        col_com_entrada, col_entrada, col_valor_remanescente_extenso = st.columns(3)
-        with col_com_entrada:
-            st.markdown("Com entrada?")
+        col_entrada, col_valor_atual, col_valor_remanescente_extenso = st.columns(3)
         with col_entrada:
-            entrada = st.text_input("Informe o valor:", key="entrada", on_change=atualizar_entrada)
+            entrada = st.text_input("Com entrada? Informe o valor:", key="entrada", on_change=atualizar_entrada)
         valor_remanescente = valor_remanescente_calculado(valor_total, entrada)
+        st.session_state["valor_atual_exibicao"] = valor_remanescente
+        st.session_state["valor_remanescente_extenso_exibicao"] = valor_por_extenso(valor_remanescente)
+        with col_valor_atual:
+            st.text_input("Valor atual", disabled=True, key="valor_atual_exibicao")
         with col_valor_remanescente_extenso:
-            st.text_input("Valor remanescente por extenso", value=valor_por_extenso(valor_remanescente), disabled=True, key="valor_remanescente_extenso_exibicao")
+            st.text_input("Valor remanescente por extenso", disabled=True, key="valor_remanescente_extenso_exibicao")
         mostrar_formulario_cheque = any(
             modalidade in modalidades_pagamento
             for modalidade in OPCOES_MODALIDADES_PAGAMENTO[:2]

@@ -219,6 +219,15 @@ def gerar_tabela_vencimentos(
     return vencimentos
 
 
+def somar_valores_tabela(vencimentos: list[dict[str, str]]) -> str:
+    total = Decimal("0")
+    for item in vencimentos:
+        valor = valor_monetario_para_decimal(item.get("Valor", ""))
+        if valor is not None:
+            total += valor
+    return decimal_para_texto_monetario(total)
+
+
 def numero_por_extenso(numero: int) -> str:
     return num2words(numero, lang="pt_BR")
 
@@ -587,6 +596,7 @@ with st.container():
             if valor_cheque_decimal < 0:
                 valor_cheque_decimal = Decimal("0")
             if valor_cheque_decimal > remanescente_decimal:
+                st.warning("O valor informado para cheque nao pode ser maior que o saldo devedor inicial/remanescente.")
                 valor_cheque_decimal = remanescente_decimal
 
             valor_cheque_base = decimal_para_texto_monetario(valor_cheque_decimal)
@@ -625,6 +635,7 @@ with st.container():
                 valor_total=valor_cheque_base,
             )
             st.dataframe(tabela_vencimentos, hide_index=True, width="stretch")
+            st.caption(f"Soma das parcelas: {somar_valores_tabela(tabela_vencimentos)}")
 
             st.markdown("### Dados bancarios")
             col_cheque1, col_cheque2, col_cheque3, col_cheque4 = st.columns(4)
@@ -669,6 +680,7 @@ with st.container():
                 valor_total=valor_cartao_base,
             )
             st.dataframe(tabela_vencimentos_cartao, hide_index=True, width="stretch")
+            st.caption(f"Soma das parcelas: {somar_valores_tabela(tabela_vencimentos_cartao)}")
 
             col_cartao1, col_cartao2, col_cartao3, col_cartao4 = st.columns(4)
             with col_cartao1:

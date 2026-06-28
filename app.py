@@ -4,6 +4,7 @@ from datetime import date, timedelta
 from decimal import Decimal, InvalidOperation
 from io import BytesIO
 
+import pandas as pd
 import streamlit as st
 from PyPDF2 import PdfReader
 from docx import Document
@@ -275,6 +276,7 @@ def gerar_tabela_vencimentos(
                 "Parcela": str(indice),
                 "Vencimento": formatar_data(vencimento),
                 "Valor": valor_parcela,
+                "Cheque(s) nº": "",
             }
         )
 
@@ -294,7 +296,15 @@ def montar_cronograma_contrato(vencimentos: list[dict[str, str]]) -> str:
     if not vencimentos:
         return "Sem cronograma informado."
     return "\n".join(
-        f"Parcela {item['Parcela']} - Vencimento: {item['Vencimento']} - Valor: R$ {item['Valor']}"
+        (
+            f"Parcela {item['Parcela']} - Vencimento: {item['Vencimento']} - "
+            f"Valor: R$ {item['Valor']}"
+            + (
+                f" - Cheque(s) nº: {item['Cheque(s) nº']}"
+                if str(item.get("Cheque(s) nº", "")).strip()
+                else ""
+            )
+        )
         for item in vencimentos
     )
 
@@ -401,19 +411,10 @@ def inicializar_estado_formulario() -> None:
         "cheque_unico_banco": "",
         "cheque_unico_agencia": "",
         "cheque_unico_conta": "",
-        "cheque_unico_numero": "",
         "cartao_credito_banco": "",
         "cartao_credito_agencia": "",
         "cartao_credito_conta": "",
         "cartao_credito_numero": "",
-        "parcela1_cheque": "",
-        "parcela1_banco": "",
-        "parcela2_cheque": "",
-        "parcela2_banco": "",
-        "parcela3_cheque": "",
-        "parcela3_banco": "",
-        "parcela4_cheque": "",
-        "parcela4_banco": "",
         "testemunha1_nome": "",
         "testemunha1_cpf": "",
         "testemunha2_nome": "",
@@ -506,7 +507,7 @@ Valor destinado ao cheque: R$ {negrito(campo_ou_linha(dados["valor_cheque_base"]
 Cronograma de vencimentos do cheque:
 {montar_cronograma_contrato(dados["tabela_vencimentos_cheque"])}
 
-Dados do cheque: Banco: {negrito(campo_ou_linha(dados["cheque_unico_banco"], "_______"))} | Agência: {negrito(campo_ou_linha(dados["cheque_unico_agencia"], "___________"))} | Conta: {negrito(campo_ou_linha(dados["cheque_unico_conta"], "____________"))} | Cheque(s) nº: {negrito(campo_ou_linha(dados["cheque_unico_numero"], "000185-000186-000187"))}.
+Dados do cheque: Banco: {negrito(campo_ou_linha(dados["cheque_unico_banco"], "_______"))} | Agência: {negrito(campo_ou_linha(dados["cheque_unico_agencia"], "___________"))} | Conta: {negrito(campo_ou_linha(dados["cheque_unico_conta"], "____________"))}.
 """
 
     bloco_cartao = ""
@@ -760,11 +761,9 @@ with st.container():
                 intervalo_dias=int(dias_atraso),
                 valor_total=valor_cheque_base,
             )
-            st.dataframe(tabela_vencimentos, hide_index=True, width="stretch")
-            st.caption(f"Soma das parcelas: {somar_valores_tabela(tabela_vencimentos)}")
 
             st.markdown("### Dados bancários")
-            col_cheque1, col_cheque2, col_cheque3, col_cheque4 = st.columns(4)
+            col_cheque1, col_cheque2, col_cheque3 = st.columns(3)
             with col_cheque1:
                 cheque_unico_banco = st.text_input("Banco", key="cheque_unico_banco")
             with col_cheque2:
@@ -773,13 +772,24 @@ with st.container():
             with col_cheque3:
                 cheque_unico_conta = st.text_input("Conta", key="cheque_unico_conta")
                 exibir_warning_campo_numerico(cheque_unico_conta, "Conta")
-            with col_cheque4:
-                cheque_unico_numero = st.text_input(
-                    "Cheque(s) nº",
-                    key="cheque_unico_numero",
-                    placeholder="000185-000186-000187",
-                )
-                exibir_warning_campo_numerico(cheque_unico_numero, "Cheque(s) nº")
+
+            tabela_vencimentos_df = pd.DataFrame(tabela_vencimentos)
+            if not tabela_vencimentos_df.empty:
+                tabela_vencimentos_df["Cheque(s) nº"] = tabela_vencimentos_df["Cheque(s) nº"].fillna("")
+                tabela_vencimentos = st.data_editor(
+                    tabela_vencimentos_df,
+                    hide_index=True,
+                    width="stretch",
+                    disabled=["Parcela", "Vencimento", "Valor"],
+                    column_config={
+                        "Cheque(s) nº": st.column_config.TextColumn(
+                            "Cheque(s) nº",
+                            help="Informe o número do cheque correspondente a esta parcela.",
+                        )
+                    },
+                    key="tabela_vencimentos_cheque_editor",
+                ).to_dict("records")
+                st.caption(f"Soma das parcelas: {somar_valores_tabela(tabela_vencimentos)}")
         else:
             qtd_parcelas = st.session_state.get("qtd_parcelas", 4)
             dias_atraso = st.session_state.get("dias_atraso", 30)
@@ -787,7 +797,6 @@ with st.container():
             cheque_unico_banco = st.session_state.get("cheque_unico_banco", "")
             cheque_unico_agencia = st.session_state.get("cheque_unico_agencia", "")
             cheque_unico_conta = st.session_state.get("cheque_unico_conta", "")
-            cheque_unico_numero = st.session_state.get("cheque_unico_numero", "")
 
         if exibir_formulario_cheque and exibir_formulario_cartao:
             st.markdown('<div class="bloco-separador"></div>', unsafe_allow_html=True)
@@ -870,13 +879,9 @@ parcela_datas = [
     for indice in range(1, 5)
 ]
 parcela1_data, parcela2_data, parcela3_data, parcela4_data = parcela_datas
-parcela1_cheque = st.session_state.get("parcela1_cheque", "")
 parcela1_banco = st.session_state.get("parcela1_banco", "")
-parcela2_cheque = st.session_state.get("parcela2_cheque", "")
 parcela2_banco = st.session_state.get("parcela2_banco", "")
-parcela3_cheque = st.session_state.get("parcela3_cheque", "")
 parcela3_banco = st.session_state.get("parcela3_banco", "")
-parcela4_cheque = st.session_state.get("parcela4_cheque", "")
 parcela4_banco = st.session_state.get("parcela4_banco", "")
 
 dados = {
@@ -908,22 +913,17 @@ dados = {
     "cheque_unico_banco": cheque_unico_banco,
     "cheque_unico_agencia": cheque_unico_agencia,
     "cheque_unico_conta": cheque_unico_conta,
-    "cheque_unico_numero": cheque_unico_numero,
     "cartao_credito_banco": cartao_credito_banco,
     "cartao_credito_agencia": cartao_credito_agencia,
     "cartao_credito_conta": cartao_credito_conta,
     "cartao_credito_numero": cartao_credito_numero,
     "parcela1_data": formatar_data(parcela1_data),
-    "parcela1_cheque": parcela1_cheque,
     "parcela1_banco": parcela1_banco,
     "parcela2_data": formatar_data(parcela2_data),
-    "parcela2_cheque": parcela2_cheque,
     "parcela2_banco": parcela2_banco,
     "parcela3_data": formatar_data(parcela3_data),
-    "parcela3_cheque": parcela3_cheque,
     "parcela3_banco": parcela3_banco,
     "parcela4_data": formatar_data(parcela4_data),
-    "parcela4_cheque": parcela4_cheque,
     "parcela4_banco": parcela4_banco,
     "foro": foro,
     "municipio_assinatura": municipio_assinatura,

@@ -563,9 +563,13 @@ E, por estarem assim justos e contratados, firmam o presente instrumento em 02 (
 {negrito(campo_ou_linha(dados["municipio_assinatura"], "Sao Francisco do Guapore - RO"))}, {negrito(dados["dia_assinatura"])} de {negrito(dados["mes_assinatura"])} de {negrito(dados["ano_assinatura"])}.
 
 
+Credor - {negrito(campo_ou_linha(dados["credor_nome"], "NOME DO CREDOR"))}
+
 ______________________________________________
 CREDOR
 
+
+Devedor - {negrito(campo_ou_linha(dados["devedor_nome"], "NOME DO DEVEDOR"))}
 
 ______________________________________________
 DEVEDOR
@@ -622,14 +626,14 @@ with st.container():
         col_credor, col_devedor = st.columns(2)
         with col_credor:
             st.markdown("### Credor")
-            credor_nome = st.text_input("Nome do credor ou leiloeira", key="credor_nome")
+            credor_nome = st.text_input("Nome do credor ou da leiloeira", key="credor_nome")
             credor_doc = st.text_input("CPF/CNPJ do credor", key="credor_doc")
             exibir_warning_campo_numerico(credor_doc, "CPF/CNPJ do credor")
-            credor_endereco = st.text_area("Endereco do credor", key="credor_endereco", height=95)
+            credor_endereco = st.text_area("Endereço do credor", key="credor_endereco", height=95)
 
         with col_devedor:
             st.markdown("### Devedor")
-            devedor_nome = st.text_input("Nome do comprador", key="devedor_nome")
+            devedor_nome = st.text_input("Nome completo do devedor", key="devedor_nome")
             devedor_doc_col, devedor_rg_col = st.columns(2)
             with devedor_doc_col:
                 devedor_cpf = st.text_input("CPF do devedor", key="devedor_cpf")
@@ -637,7 +641,7 @@ with st.container():
             with devedor_rg_col:
                 devedor_rg = st.text_input("RG do devedor", key="devedor_rg")
                 exibir_warning_campo_numerico(devedor_rg, "RG do devedor")
-            devedor_endereco = st.text_area("Endereco do devedor", key="devedor_endereco", height=95)
+            devedor_endereco = st.text_area("Endereço do devedor", key="devedor_endereco", height=95)
 
         botoes_col1, botoes_col2, botoes_col3 = st.columns([1, 1, 1])
         with botoes_col1:
@@ -650,7 +654,7 @@ with st.container():
             st.button("Limpar devedor", width="stretch", on_click=limpar_dados_devedor)
 
     with st.expander("Financeiro", expanded=False):
-        st.markdown("### Leil\u00e3o e d\u00edvida")
+        st.markdown("### Leilão e dívida")
         col_data_leilao, col_divida, col_valor_extenso = st.columns(3)
         with col_data_leilao:
             data_leilao = st.date_input("Data inicial", value=data_leilao_padrao, format="DD/MM/YYYY")
@@ -662,7 +666,7 @@ with st.container():
             valor_extenso = st.text_input("Valor por extenso", valor_por_extenso(valor_total), disabled=True)
 
         lotes = st.text_input("N\u00famero dos lotes", "")
-        exibir_warning_campo_numerico(lotes, "Numero dos lotes")
+        exibir_warning_campo_numerico(lotes, "Número dos lotes")
 
         st.markdown("### Pagamento")
         modalidades_pagamento = st.multiselect(
@@ -751,7 +755,7 @@ with st.container():
             st.dataframe(tabela_vencimentos, hide_index=True, width="stretch")
             st.caption(f"Soma das parcelas: {somar_valores_tabela(tabela_vencimentos)}")
 
-            st.markdown("### Dados bancarios")
+            st.markdown("### Dados bancários")
             col_cheque1, col_cheque2, col_cheque3, col_cheque4 = st.columns(4)
             with col_cheque1:
                 cheque_unico_banco = st.text_input("Banco", key="cheque_unico_banco")
@@ -763,11 +767,11 @@ with st.container():
                 exibir_warning_campo_numerico(cheque_unico_conta, "Conta")
             with col_cheque4:
                 cheque_unico_numero = st.text_input(
-                    "Cheque(s) n°",
+                    "Cheque(s) nº",
                     key="cheque_unico_numero",
                     placeholder="000185-000186-000187",
                 )
-                exibir_warning_campo_numerico(cheque_unico_numero, "Cheque(s) n°")
+                exibir_warning_campo_numerico(cheque_unico_numero, "Cheque(s) nº")
         else:
             qtd_parcelas = st.session_state.get("qtd_parcelas", 4)
             dias_atraso = st.session_state.get("dias_atraso", 30)
@@ -781,7 +785,7 @@ with st.container():
             st.markdown('<div class="bloco-separador"></div>', unsafe_allow_html=True)
 
         if exibir_formulario_cartao:
-            st.markdown("### Para Cartao de Credito")
+            st.markdown("### Para Cartão de Crédito")
             col_qtd_parcelas_cartao, col_dias_parcela_cartao = st.columns(2)
             with col_qtd_parcelas_cartao:
                 qtd_parcelas_cartao = st.number_input("QTD parcelas (mensais)", min_value=1, step=1, key="qtd_parcelas_cartao")
@@ -814,11 +818,11 @@ with st.container():
                 exibir_warning_campo_numerico(cartao_credito_conta, "Conta")
             with col_cartao4:
                 cartao_credito_numero = st.text_input(
-                    "Numero",
+                    "Número",
                     key="cartao_credito_numero",
                     placeholder="0000 0000 0000 0000 12/30",
                 )
-                exibir_warning_campo_numerico(cartao_credito_numero, "Numero")
+                exibir_warning_campo_numerico(cartao_credito_numero, "Número")
         else:
             qtd_parcelas_cartao = st.session_state.get("qtd_parcelas_cartao", 4)
             dias_atraso_cartao = st.session_state.get("dias_atraso_cartao", 30)
@@ -828,11 +832,15 @@ with st.container():
             cartao_credito_conta = st.session_state.get("cartao_credito_conta", "")
             cartao_credito_numero = st.session_state.get("cartao_credito_numero", "")
 
-    with st.expander("Informacoes finais", expanded=False):
+    with st.expander("Informações finais", expanded=False):
         st.markdown("### Foro e assinatura")
         foro = st.text_input("Comarca/UF", key="foro")
-        municipio_assinatura = st.text_input("Municipio da assinatura", key="municipio_assinatura")
+        municipio_assinatura = st.text_input("Município da assinatura", key="municipio_assinatura")
         data_assinatura = st.date_input("Data da assinatura", value=date.today(), format="DD/MM/YYYY")
+
+        st.markdown("### Assinantes")
+        st.markdown(f"**Credor:** {credor_nome or '____________________________'}")
+        st.markdown(f"**Devedor:** {devedor_nome or '____________________________'}")
 
         col_testemunha1, col_testemunha2 = st.columns(2)
         with col_testemunha1:

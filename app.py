@@ -437,7 +437,7 @@ def extrair_partes_importadas(texto: str) -> dict[str, str]:
     )
     if bloco_credor:
         padrao_credor = re.compile(
-            r"(?P<nome>.*?),\s*inscrito\(a\)\s*no\s*CPF/CNPJ\s*n(?:?|?|o)?\s*(?P<doc>.*?),\s*com\s*endereco\s*a\s*(?P<endereco>.*?);?$",
+            r"(?P<nome>.*?),\s*inscrito\(a\)\s*no\s*CPF/CNPJ\s*n(?:º|°|o)?\s*(?P<doc>.*?),\s*com\s*endereco\s*a\s*(?P<endereco>.*?);?$",
             re.IGNORECASE,
         )
         credor = padrao_credor.search(bloco_credor)
@@ -453,7 +453,7 @@ def extrair_partes_importadas(texto: str) -> dict[str, str]:
     )
     if bloco_devedor:
         padrao_devedor = re.compile(
-            r"(?P<nome>.*?),\s*inscrito\(a\)\s*no\s*CPF\s*n(?:?|?|o)?\s*(?P<cpf>.*?),\s*portador\(a\)\s*do\s*RG\s*n(?:?|?|o)?\s*(?P<rg>.*?),\s*residente\s*e\s*domiciliado\(a\)\s*a\s*(?P<endereco>.*?);?$",
+            r"(?P<nome>.*?),\s*inscrito\(a\)\s*no\s*CPF\s*n(?:º|°|o)?\s*(?P<cpf>.*?),\s*portador\(a\)\s*do\s*RG\s*n(?:º|°|o)?\s*(?P<rg>.*?),\s*residente\s*e\s*domiciliado\(a\)\s*a\s*(?P<endereco>.*?);?$",
             re.IGNORECASE,
         )
         devedor = padrao_devedor.search(bloco_devedor)

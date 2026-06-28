@@ -390,9 +390,9 @@ def extrair_partes_importadas(texto: str) -> dict[str, str]:
 
 def inicializar_estado_formulario() -> None:
     defaults = {
-        "credor_nome": "NOME DO VENDEDOR OU LEILOEIRA",
-        "credor_doc": "XXXXXXXXXXXX",
-        "credor_endereco": "ENDEREÇO COMPLETO",
+        "credor_nome": "",
+        "credor_doc": "",
+        "credor_endereco": "",
         "devedor_nome": "",
         "devedor_cpf": "",
         "devedor_rg": "",
@@ -422,6 +422,15 @@ def inicializar_estado_formulario() -> None:
 
     for chave, valor in defaults.items():
         st.session_state.setdefault(chave, valor)
+
+    valores_legados = {
+        "credor_nome": "NOME DO VENDEDOR OU LEILOEIRA",
+        "credor_doc": "XXXXXXXXXXXX",
+        "credor_endereco": "ENDEREÇO COMPLETO",
+    }
+    for chave, valor_legado in valores_legados.items():
+        if st.session_state.get(chave) == valor_legado:
+            st.session_state[chave] = ""
 
     modalidades = st.session_state.get("modalidades_pagamento", [])
     if not isinstance(modalidades, list):
@@ -634,21 +643,51 @@ with st.container():
         col_credor, col_devedor = st.columns(2)
         with col_credor:
             st.markdown("### Credor")
-            credor_nome = st.text_input("Nome do credor ou da leiloeira", key="credor_nome")
-            credor_doc = st.text_input("CPF/CNPJ do credor", key="credor_doc")
+            credor_nome = st.text_input(
+                "Nome do credor ou da leiloeira",
+                key="credor_nome",
+                placeholder="NOME DO VENDEDOR OU LEILOEIRA",
+            )
+            credor_doc = st.text_input(
+                "CPF/CNPJ do credor",
+                key="credor_doc",
+                placeholder="000.000.000-00 ou 00.000.000/0001-00",
+            )
             exibir_warning_campo_numerico(credor_doc, "CPF/CNPJ do credor")
-            credor_endereco = st.text_area("Endereço do credor", key="credor_endereco", height=95)
+            credor_endereco = st.text_area(
+                "Endereço do credor",
+                key="credor_endereco",
+                placeholder="ENDEREÇO COMPLETO",
+                height=95,
+            )
 
         with col_devedor:
             st.markdown("### Devedor")
-            devedor_nome = st.text_input("Nome completo do devedor", key="devedor_nome")
+            devedor_nome = st.text_input(
+                "Nome completo do devedor",
+                key="devedor_nome",
+                placeholder="NOME COMPLETO DO DEVEDOR",
+            )
             devedor_doc_col, devedor_rg_col = st.columns(2)
             with devedor_doc_col:
-                devedor_cpf = st.text_input("CPF do devedor", key="devedor_cpf")
+                devedor_cpf = st.text_input(
+                    "CPF do devedor",
+                    key="devedor_cpf",
+                    placeholder="000.000.000-00",
+                )
                 exibir_warning_campo_numerico(devedor_cpf, "CPF do devedor")
             with devedor_rg_col:
-                devedor_rg = st.text_input("RG do devedor", key="devedor_rg")
-            devedor_endereco = st.text_area("Endereço do devedor", key="devedor_endereco", height=95)
+                devedor_rg = st.text_input(
+                    "RG do devedor",
+                    key="devedor_rg",
+                    placeholder="12.345.678-9 SSP/UF",
+                )
+            devedor_endereco = st.text_area(
+                "Endereço do devedor",
+                key="devedor_endereco",
+                placeholder="ENDEREÇO COMPLETO",
+                height=95,
+            )
 
         botoes_col1, botoes_col2, botoes_col3 = st.columns([1, 1, 1])
         with botoes_col1:

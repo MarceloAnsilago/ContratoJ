@@ -417,7 +417,7 @@ def texto_padrao(dados: dict) -> str:
     entrada_valor = valor_monetario_para_decimal(dados["entrada"]) or Decimal("0")
     possui_entrada = entrada_valor > 0
     resumo_entrada = (
-        f"Foi paga entrada no valor de R$ {negrito(campo_ou_linha(dados['entrada'], '0,00'))} ({negrito(campo_ou_linha(valor_por_extenso(dados['entrada']), 'zero reais'))}). "
+        f"Desse total originario, foi paga entrada no valor de R$ {negrito(campo_ou_linha(dados['entrada'], '0,00'))} ({negrito(campo_ou_linha(valor_por_extenso(dados['entrada']), 'zero reais'))}). "
         if possui_entrada
         else ""
     )
@@ -473,11 +473,11 @@ As partes acima qualificadas tem entre si justo e contratado o presente instrume
 
 CLAUSULA PRIMEIRA - DA ORIGEM DA DIVIDA
 
-O DEVEDOR reconhece, confessa e assume ser legitimo devedor da quantia liquida, certa e exigivel de R$ {negrito(campo_ou_linha(dados["valor_total"], "___________________"))} ({negrito(campo_ou_linha(dados["valor_extenso"], "_______________________________________________________"))}), decorrente da aquisicao de animais bovinos realizada em leilao promovido em {negrito(dados["data_leilao"])}, conforme lote(s) n {negrito(campo_ou_linha(dados["lotes"], "_______________________________"))}, adquiridos pelo DEVEDOR. {resumo_entrada}Assim, resta saldo atual de R$ {negrito(campo_ou_linha(dados["valor_remanescente"], "0,00"))} ({negrito(campo_ou_linha(valor_por_extenso(dados["valor_remanescente"]), "zero reais"))}), a ser pago da seguinte forma: {resumo_modalidades}.
+O DEVEDOR reconhece que a aquisicao objeto deste instrumento totalizou originalmente R$ {negrito(campo_ou_linha(dados["valor_total"], "___________________"))} ({negrito(campo_ou_linha(dados["valor_extenso"], "_______________________________________________________"))}), decorrente da aquisicao de animais bovinos realizada em leilao promovido em {negrito(dados["data_leilao"])}, conforme lote(s) n {negrito(campo_ou_linha(dados["lotes"], "_______________________________"))}, adquiridos pelo DEVEDOR. {resumo_entrada}Assim, o DEVEDOR confessa e assume como saldo devedor atual a quantia liquida, certa e exigivel de R$ {negrito(campo_ou_linha(dados["valor_remanescente"], "0,00"))} ({negrito(campo_ou_linha(valor_por_extenso(dados["valor_remanescente"]), "zero reais"))}), a ser paga da seguinte forma: {resumo_modalidades}.
 
 CLAUSULA SEGUNDA - DO VALOR E FORMA DE PAGAMENTO
 
-O valor total da divida confessada e de R$ {negrito(campo_ou_linha(dados["valor_total"], "__________________"))} ({negrito(campo_ou_linha(dados["valor_extenso"], "________________________________________________________"))}), cujo pagamento sera realizado por uma das modalidades abaixo, expressamente escolhida e assinalada pelo DEVEDOR no ato da assinatura deste instrumento:
+O valor total da divida confessada e de R$ {negrito(campo_ou_linha(dados["valor_remanescente"], "__________________"))} ({negrito(campo_ou_linha(valor_por_extenso(dados["valor_remanescente"]), "________________________________________________________"))}), cujo pagamento sera realizado por uma das modalidades abaixo, expressamente escolhida e assinalada pelo DEVEDOR no ato da assinatura deste instrumento:
 {bloco_cheque}
 {bloco_cartao}
 Paragrafo primeiro. A modalidade de pagamento escolhida pelo DEVEDOR e assinalada acima integrara este contrato para todos os efeitos legais.

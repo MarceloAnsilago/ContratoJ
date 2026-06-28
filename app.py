@@ -510,7 +510,7 @@ data_leilao_padrao = date.today()
 with st.container():
     st.subheader("Dados do contrato")
 
-    with st.expander("Credor e devedor", expanded=True):
+    with st.expander("Credor e devedor", expanded=False):
         col_credor, col_devedor = st.columns(2)
         with col_credor:
             st.markdown("### Credor")
@@ -538,9 +538,7 @@ with st.container():
         with botoes_col3:
             st.button("Limpar devedor", width="stretch", on_click=limpar_dados_devedor)
 
-    st.markdown('<div class="bloco-separador"></div>', unsafe_allow_html=True)
-
-    with st.expander("Financeiro", expanded=True):
+    with st.expander("Financeiro", expanded=False):
         st.markdown("### Leil\u00e3o e d\u00edvida")
         col_data_leilao, col_divida, col_valor_extenso = st.columns(3)
         with col_data_leilao:
@@ -698,7 +696,7 @@ with st.container():
             cartao_credito_conta = st.session_state.get("cartao_credito_conta", "")
             cartao_credito_numero = st.session_state.get("cartao_credito_numero", "")
 
-    with st.expander("Informacoes finais", expanded=True):
+    with st.expander("Informacoes finais", expanded=False):
         st.markdown("### Foro e assinatura")
         foro = st.text_input("Comarca/UF", key="foro")
         municipio_assinatura = st.text_input("Municipio da assinatura", key="municipio_assinatura")

@@ -374,36 +374,53 @@ def limpar_campo_importado(valor: str) -> str:
     return texto
 
 
+def extrair_bloco_entre(texto: str, inicio: str, fins: list[str]) -> str:
+    pos_inicio = texto.find(inicio)
+    if pos_inicio == -1:
+        return ""
+    pos_inicio += len(inicio)
+    candidatos = [texto.find(fim, pos_inicio) for fim in fins if texto.find(fim, pos_inicio) != -1]
+    pos_fim = min(candidatos) if candidatos else len(texto)
+    return texto[pos_inicio:pos_fim].strip()
+
+
 def extrair_tabela_cronograma(texto: str, rotulo: str, incluir_cheque: bool) -> list[dict[str, str]]:
-    padrao_secao = re.compile(
-        rf"{re.escape(rotulo)}:(.*?)(?:\n\s*(?:Opcao 2 - Cartao de credito|Cartao de credito|CLAUSULA TERCEIRA|CLAUSULA QUARTA|CLAUSULA SEGUNDA|Paragrafo primeiro|Paragrafo unico)\b|\Z)",
-        re.IGNORECASE | re.DOTALL,
+    bloco = extrair_bloco_entre(
+        texto,
+        f"{rotulo}:",
+        [
+            "Opcao 2 - Cartao de credito",
+            "Cartao de credito",
+            "CLAUSULA TERCEIRA",
+            "CLAUSULA QUARTA",
+            "CLAUSULA SEGUNDA",
+            "Paragrafo primeiro",
+            "Paragrafo unico",
+        ],
     )
-    secao = padrao_secao.search(texto)
-    if not secao:
+    if not bloco:
         return []
 
-    conteudo = secao.group(1)
     if incluir_cheque:
         padrao_linha = re.compile(
-            r"Parcela\s*(?P<parcela>\d+)\s*-\s*Vencimento:\s*(?P<vencimento>\d{2}/\d{2}/\d{4})\s*-\s*Valor:\s*R\$\s*(?P<valor>[\d\.,]+)(?:\s*-\s*Cheque\(s\)\s*n(?:º|°|o)?:\s*(?P<cheque>.*?))?(?:\s|$)",
+            r"Parcela\s*(?P<parcela>\d+)\s*-\s*Vencimento:\s*(?P<vencimento>\d{2}/\d{2}/\d{4})\s*-\s*Valor:\s*R\$\s*(?P<valor>[\d\.,]+)(?:\s*-\s*Cheque\(s\)\s*n(?:º|°|o)?\s*:\s*(?P<cheque>[^\n]*))?",
             re.IGNORECASE,
         )
     else:
         padrao_linha = re.compile(
-            r"Parcela\s*(?P<parcela>\d+)\s*-\s*Vencimento:\s*(?P<vencimento>\d{2}/\d{2}/\d{4})\s*-\s*Valor:\s*R\$\s*(?P<valor>[\d\.,]+)(?:\s|$)",
+            r"Parcela\s*(?P<parcela>\d+)\s*-\s*Vencimento:\s*(?P<vencimento>\d{2}/\d{2}/\d{4})\s*-\s*Valor:\s*R\$\s*(?P<valor>[\d\.,]+)",
             re.IGNORECASE,
         )
 
     linhas: list[dict[str, str]] = []
-    for match in padrao_linha.finditer(conteudo):
+    for match in padrao_linha.finditer(bloco):
         item = {
             "Parcela": match.group("parcela"),
             "Vencimento": match.group("vencimento"),
             "Valor": match.group("valor"),
         }
         if incluir_cheque:
-            item['Cheque(s) nº'] = limpar_campo_importado(match.group("cheque") or "")
+            item["Cheque(s) n?"] = limpar_campo_importado(match.group("cheque") or "")
         linhas.append(item)
     return linhas
 
@@ -411,29 +428,47 @@ def extrair_tabela_cronograma(texto: str, rotulo: str, incluir_cheque: bool) -> 
 def extrair_partes_importadas(texto: str) -> dict[str, object]:
     texto_normalizado = normalizar_texto_importado(texto)
 
-    padrao_credor = re.compile(
-        r"CREDOR:\s*(?P<nome>.*?),\s*inscrito\(a\)\s*no\s*CPF/CNPJ\s*n(?:º|°|o)?\s*(?P<doc>.*?),\s*com\s*endereco\s*a\s*(?P<endereco>.*?);",
-        re.IGNORECASE,
-    )
-    padrao_devedor = re.compile(
-        r"DEVEDOR:\s*(?P<nome>.*?),\s*inscrito\(a\)\s*no\s*CPF\s*n(?:º|°|o)?\s*(?P<cpf>.*?),\s*portador\(a\)\s*do\s*RG\s*n(?:º|°|o)?\s*(?P<rg>.*?),\s*residente\s*e\s*domiciliado\(a\)\s*a\s*(?P<endereco>.*?);",
-        re.IGNORECASE,
-    )
-
     dados: dict[str, object] = {}
 
-    credor = padrao_credor.search(texto_normalizado)
-    if credor:
-        dados["credor_nome"] = limpar_campo_importado(credor.group("nome"))
-        dados["credor_doc"] = limpar_campo_importado(credor.group("doc"))
-        dados["credor_endereco"] = limpar_campo_importado(credor.group("endereco"))
+    bloco_credor = extrair_bloco_entre(
+        texto_normalizado,
+        "CREDOR:",
+        ["DEVEDOR:", "CLAUSULA PRIMEIRA", "CL?USULA PRIMEIRA"],
+    )
+    if bloco_credor:
+        padrao_credor = re.compile(
+            r"(?P<nome>.*?),\s*inscrito\(a\)\s*no\s*CPF/CNPJ\s*n(?:?|?|o)?\s*(?P<doc>.*?),\s*com\s*endereco\s*a\s*(?P<endereco>.*?);?$",
+            re.IGNORECASE,
+        )
+        credor = padrao_credor.search(bloco_credor)
+        if credor:
+            dados["credor_nome"] = limpar_campo_importado(credor.group("nome"))
+            dados["credor_doc"] = limpar_campo_importado(credor.group("doc"))
+            dados["credor_endereco"] = limpar_campo_importado(credor.group("endereco"))
 
-    devedor = padrao_devedor.search(texto_normalizado)
-    if devedor:
-        dados["devedor_nome"] = limpar_campo_importado(devedor.group("nome"))
-        dados["devedor_cpf"] = limpar_campo_importado(devedor.group("cpf"))
-        dados["devedor_rg"] = limpar_campo_importado(devedor.group("rg"))
-        dados["devedor_endereco"] = limpar_campo_importado(devedor.group("endereco"))
+    bloco_devedor = extrair_bloco_entre(
+        texto_normalizado,
+        "DEVEDOR:",
+        [
+            "CLAUSULA PRIMEIRA",
+            "CL?USULA PRIMEIRA",
+            "CLAUSULA SEGUNDA",
+            "CL?USULA SEGUNDA",
+            "E, por estarem",
+            "E, por estarem assim",
+        ],
+    )
+    if bloco_devedor:
+        padrao_devedor = re.compile(
+            r"(?P<nome>.*?),\s*inscrito\(a\)\s*no\s*CPF\s*n(?:?|?|o)?\s*(?P<cpf>.*?),\s*portador\(a\)\s*do\s*RG\s*n(?:?|?|o)?\s*(?P<rg>.*?),\s*residente\s*e\s*domiciliado\(a\)\s*a\s*(?P<endereco>.*?);?$",
+            re.IGNORECASE,
+        )
+        devedor = padrao_devedor.search(bloco_devedor)
+        if devedor:
+            dados["devedor_nome"] = limpar_campo_importado(devedor.group("nome"))
+            dados["devedor_cpf"] = limpar_campo_importado(devedor.group("cpf"))
+            dados["devedor_rg"] = limpar_campo_importado(devedor.group("rg"))
+            dados["devedor_endereco"] = limpar_campo_importado(devedor.group("endereco"))
 
     valor_total = re.search(r"totalizou originalmente R\$\s*(?P<valor>[\d\.,]+)", texto_normalizado, re.IGNORECASE)
     if valor_total:

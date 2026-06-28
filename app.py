@@ -566,13 +566,11 @@ E, por estarem assim justos e contratados, firmam o presente instrumento em 02 (
 Credor - {negrito(campo_ou_linha(dados["credor_nome"], "NOME DO CREDOR"))}
 
 ______________________________________________
-CREDOR
 
 
 Devedor - {negrito(campo_ou_linha(dados["devedor_nome"], "NOME DO DEVEDOR"))}
 
 ______________________________________________
-DEVEDOR
 
 
 TESTEMUNHAS:

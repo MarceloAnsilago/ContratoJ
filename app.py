@@ -590,13 +590,14 @@ with st.container():
                     on_change=atualizar_valor_cheque_divisao,
                 )
             valor_divisao_informado = str(valor_cheque_divisao).strip() != ""
+            valor_divisao_valido = valor_divisao_informado
 
             remanescente_decimal = valor_monetario_para_decimal(valor_remanescente) or Decimal("0")
             valor_cheque_decimal = valor_monetario_para_decimal(valor_cheque_divisao) or Decimal("0")
             if valor_cheque_decimal < 0:
                 valor_cheque_decimal = Decimal("0")
             if valor_cheque_decimal > remanescente_decimal:
-                st.warning("O valor informado para cheque nao pode ser maior que o saldo devedor inicial/remanescente.")
+                valor_divisao_valido = False
                 valor_cheque_decimal = remanescente_decimal
 
             valor_cheque_base = decimal_para_texto_monetario(valor_cheque_decimal)
@@ -606,12 +607,16 @@ with st.container():
                 st.text_input("Valor para cartao", disabled=True, key="valor_cartao_divisao_exibicao")
             if not valor_divisao_informado:
                 st.info("Informe o valor que sera pago com cheque e pressione Enter para liberar os formularios de cheque e cartao.")
+            elif not valor_divisao_valido:
+                st.warning("O valor informado para cheque nao pode ser maior que o saldo devedor inicial/remanescente.")
+        else:
+            valor_divisao_valido = True
 
         exibir_formulario_cheque = mostrar_formulario_cheque and (
-            not mostrar_formulario_cartao or valor_divisao_informado
+            not mostrar_formulario_cartao or (valor_divisao_informado and valor_divisao_valido)
         )
         exibir_formulario_cartao = mostrar_formulario_cartao and (
-            not mostrar_formulario_cheque or valor_divisao_informado
+            not mostrar_formulario_cheque or (valor_divisao_informado and valor_divisao_valido)
         )
 
         if exibir_formulario_cheque:

@@ -34,7 +34,7 @@ OPCOES_MODALIDADES_PAGAMENTO = [
     "Cartao de credito",
 ]
 
-OPCOES_DIAS_PARCELA = [30, 60, 90, 120]
+OPCOES_DIAS_PARCELA = [30, 60, 90, 120, 150, 180]
 
 MAPA_MODALIDADES_LEGADAS = {
     "Cheque ??nico para 120 dias": "Cheque bancario",
@@ -264,7 +264,12 @@ def atualizar_modalidades_pagamento() -> None:
 
 
 def gerar_tabela_vencimentos(
-    data_inicial: date, qtd_parcelas: int, intervalo_dias: int, valor_total: str
+    data_inicial: date,
+    qtd_parcelas: int,
+    intervalo_dias: int,
+    valor_total: str,
+    *,
+    include_cheque_numero: bool = True,
 ) -> list[dict[str, str]]:
     valor_parcela = valor_parcela_calculado(valor_total, qtd_parcelas)
     vencimentos = []
@@ -276,7 +281,7 @@ def gerar_tabela_vencimentos(
                 "Parcela": str(indice),
                 "Vencimento": formatar_data(vencimento),
                 "Valor": valor_parcela,
-                "Cheque(s) nº": "",
+                **({"Cheque(s) nº": ""} if include_cheque_numero else {}),
             }
         )
 
@@ -301,7 +306,7 @@ def montar_cronograma_contrato(vencimentos: list[dict[str, str]]) -> str:
             f"Valor: R$ {item['Valor']}"
             + (
                 f" - Cheque(s) nº: {item['Cheque(s) nº']}"
-                if str(item.get("Cheque(s) nº", "")).strip()
+                if "Cheque(s) nº" in item and str(item.get("Cheque(s) nº", "")).strip()
                 else ""
             )
         )
@@ -797,6 +802,7 @@ with st.container():
                 qtd_parcelas=int(qtd_parcelas),
                 intervalo_dias=int(dias_atraso),
                 valor_total=valor_cheque_base,
+                include_cheque_numero=True,
             )
 
             st.markdown("### Dados bancários")
@@ -857,6 +863,7 @@ with st.container():
                 qtd_parcelas=int(qtd_parcelas_cartao),
                 intervalo_dias=int(dias_atraso_cartao),
                 valor_total=valor_cartao_base,
+                include_cheque_numero=False,
             )
             st.dataframe(tabela_vencimentos_cartao, hide_index=True, width="stretch")
             st.caption(f"Soma das parcelas: {somar_valores_tabela(tabela_vencimentos_cartao)}")

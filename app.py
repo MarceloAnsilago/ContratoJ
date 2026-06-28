@@ -197,7 +197,7 @@ def atualizar_entrada() -> None:
 
 def atualizar_valor_cheque_divisao() -> None:
     valor = str(st.session_state.get("valor_cheque_divisao", "")).strip()
-    st.session_state["valor_cheque_divisao"] = valor or "0"
+    st.session_state["valor_cheque_divisao"] = valor
 
 
 def gerar_tabela_vencimentos(
@@ -311,7 +311,7 @@ def inicializar_estado_formulario() -> None:
         "qtd_parcelas": 4,
         "qtd_parcelas_cartao": 4,
         "entrada": "0",
-        "valor_cheque_divisao": "0",
+        "valor_cheque_divisao": "",
         "modalidades_pagamento": ["Cheque único para 120 dias"],
         "valor_parcela": "",
         "dias_atraso": 30,
@@ -570,6 +570,7 @@ with st.container():
         mostrar_formulario_cartao = OPCOES_MODALIDADES_PAGAMENTO[2] in modalidades_pagamento
         valor_cheque_base = valor_remanescente
         valor_cartao_base = valor_remanescente
+        valor_divisao_informado = True
 
         if mostrar_formulario_cheque and mostrar_formulario_cartao:
             col_valor_cheque, col_valor_cartao = st.columns(2)
@@ -579,6 +580,7 @@ with st.container():
                     key="valor_cheque_divisao",
                     on_change=atualizar_valor_cheque_divisao,
                 )
+            valor_divisao_informado = str(valor_cheque_divisao).strip() != ""
 
             remanescente_decimal = valor_monetario_para_decimal(valor_remanescente) or Decimal("0")
             valor_cheque_decimal = valor_monetario_para_decimal(valor_cheque_divisao) or Decimal("0")
@@ -592,8 +594,17 @@ with st.container():
             st.session_state["valor_cartao_divisao_exibicao"] = valor_cartao_base
             with col_valor_cartao:
                 st.text_input("Valor para cartao", disabled=True, key="valor_cartao_divisao_exibicao")
+            if not valor_divisao_informado:
+                st.info("Informe o valor que sera pago com cheque e pressione Enter para liberar os formularios de cheque e cartao.")
 
-        if mostrar_formulario_cheque:
+        exibir_formulario_cheque = mostrar_formulario_cheque and (
+            not mostrar_formulario_cartao or valor_divisao_informado
+        )
+        exibir_formulario_cartao = mostrar_formulario_cartao and (
+            not mostrar_formulario_cheque or valor_divisao_informado
+        )
+
+        if exibir_formulario_cheque:
             st.markdown("### Para cheque")
             col_qtd_parcelas, col_dias_parcela = st.columns(2)
             with col_qtd_parcelas:
@@ -634,10 +645,10 @@ with st.container():
             cheque_unico_conta = st.session_state.get("cheque_unico_conta", "")
             cheque_unico_numero = st.session_state.get("cheque_unico_numero", "")
 
-        if mostrar_formulario_cheque and mostrar_formulario_cartao:
+        if exibir_formulario_cheque and exibir_formulario_cartao:
             st.markdown('<div class="bloco-separador"></div>', unsafe_allow_html=True)
 
-        if mostrar_formulario_cartao:
+        if exibir_formulario_cartao:
             st.markdown("### Para Cartao de Credito")
             col_qtd_parcelas_cartao, col_dias_parcela_cartao = st.columns(2)
             with col_qtd_parcelas_cartao:

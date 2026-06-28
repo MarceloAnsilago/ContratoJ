@@ -184,6 +184,11 @@ def valor_remanescente_calculado(valor_total: str, entrada: str) -> str:
     return texto.replace(",", "X").replace(".", ",").replace("X", ".")
 
 
+def atualizar_entrada() -> None:
+    entrada = str(st.session_state.get("entrada", "")).strip()
+    st.session_state["entrada"] = entrada or "0"
+
+
 def gerar_tabela_vencimentos(
     data_inicial: date, qtd_parcelas: int, intervalo_dias: int, valor_total: str
 ) -> list[dict[str, str]]:
@@ -538,7 +543,7 @@ with st.container():
         )
         col_entrada, col_valor_remanescente = st.columns(2)
         with col_entrada:
-            entrada = st.text_input("Com entrada?", key="entrada")
+            entrada = st.text_input("Com entrada?", key="entrada", on_change=atualizar_entrada)
         valor_remanescente = valor_remanescente_calculado(valor_total, entrada)
         with col_valor_remanescente:
             st.text_input("Valor remanescente", value=valor_remanescente, disabled=True, key="valor_remanescente_exibicao")

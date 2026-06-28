@@ -205,6 +205,14 @@ def atualizar_valor_cheque_divisao() -> None:
     st.session_state["valor_cheque_divisao"] = valor
 
 
+def atualizar_modalidades_pagamento() -> None:
+    modalidades = st.session_state.get("modalidades_pagamento", [])
+    if not isinstance(modalidades, list):
+        modalidades = [modalidades] if modalidades else []
+    if "Cheque bancario" not in modalidades or "Cartao de credito" not in modalidades:
+        st.session_state["valor_cheque_divisao"] = ""
+
+
 def gerar_tabela_vencimentos(
     data_inicial: date, qtd_parcelas: int, intervalo_dias: int, valor_total: str
 ) -> list[dict[str, str]]:
@@ -601,6 +609,7 @@ with st.container():
             "Modalidade escolhida",
             OPCOES_MODALIDADES_PAGAMENTO,
             key="modalidades_pagamento",
+            on_change=atualizar_modalidades_pagamento,
         )
         col_entrada, col_valor_atual, col_valor_remanescente_extenso = st.columns(3)
         with col_entrada:

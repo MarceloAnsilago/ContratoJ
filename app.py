@@ -108,6 +108,16 @@ st.markdown(
     [data-testid="stExpander"] summary {
         background: #ffffff !important;
     }
+    [data-testid="stMultiSelect"] div[data-baseweb="select"] > div {
+        background: #ffffff !important;
+    }
+    [data-testid="stMultiSelect"] div[data-baseweb="tag"] {
+        background: #ffffff !important;
+        border-color: #d8dee9 !important;
+    }
+    [data-testid="stMultiSelect"] div[data-baseweb="popover"] {
+        background: #ffffff !important;
+    }
     .titulo-contrato {
         display: flex;
         align-items: center;

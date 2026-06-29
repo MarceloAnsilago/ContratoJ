@@ -62,7 +62,7 @@ st.markdown(
     <style>
     .stApp {
         background:
-            radial-gradient(circle at top, #f2f6f3 0%, #fbfcfb 38%, #ffffff 100%);
+            radial-gradient(circle at top, #dfe8e2 0%, #edf2ee 42%, #f6f8f6 100%);
     }
     .stApp .block-container {
         max-width: 1280px;
@@ -97,10 +97,16 @@ st.markdown(
     .streamlit-expanderContent,
     [data-testid="stExpander"] details > div,
     [data-testid="stExpander"] [data-testid="stVerticalBlock"] {
-        background: #ffffff;
+        background: #ffffff !important;
     }
     [data-testid="stExpander"] {
-        background: #ffffff;
+        background: #ffffff !important;
+    }
+    [data-testid="stExpander"] details {
+        background: #ffffff !important;
+    }
+    [data-testid="stExpander"] summary {
+        background: #ffffff !important;
     }
     .titulo-contrato {
         display: flex;
@@ -984,8 +990,9 @@ with st.container():
                     )
                 )
 
+            tabela_vencimentos_cartao = tabela_vencimentos_cartao_df.to_dict("records")
             st.dataframe(tabela_vencimentos_cartao_df, hide_index=True, width="stretch")
-            st.caption(f"Soma das parcelas: {somar_valores_tabela(tabela_vencimentos_cartao_df.to_dict('records'))}")
+            st.caption(f"Soma das parcelas: {somar_valores_tabela(tabela_vencimentos_cartao)}")
 
             col_cartao1, col_cartao2, col_cartao3 = st.columns(3)
             with col_cartao1:
